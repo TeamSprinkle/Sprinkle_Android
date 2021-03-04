@@ -21,9 +21,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sprinkle_android">
-        <activity android:name=".activity.InitActivity"></activity>
-        <activity android:name=".activity.SettingActivity" />
-        <activity android:name=".activity.ChatActivity" />
+
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,6 +29,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".activity.InitActivity"/>
+        <activity android:name=".activity.SettingActivity" />
+        <activity android:name=".activity.ChatActivity"
+            android:theme="@style/Transparent"/>
     </application>
 
 </manifest>
