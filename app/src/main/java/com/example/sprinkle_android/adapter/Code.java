@@ -2,6 +2,7 @@ package com.example.sprinkle_android.adapter;
 
 import android.Manifest;
 import android.provider.CalendarContract;
+import android.provider.ContactsContract;
 
 public class Code {
 
@@ -45,7 +46,15 @@ public class Code {
             Manifest.permission.INTERNET,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.WRITE_CALENDAR,
-            Manifest.permission.READ_CALENDAR
+            Manifest.permission.READ_CALENDAR,
+            Manifest.permission.READ_SMS,
+            Manifest.permission.READ_PHONE_NUMBERS,
+            Manifest.permission.READ_PHONE_STATE
+    };
+
+    public static final String[] ADDRESS_PROJECTION = new String[]{
+            ContactsContract.Contacts._ID,
+            ContactsContract.Contacts.DISPLAY_NAME
     };
 }
 
