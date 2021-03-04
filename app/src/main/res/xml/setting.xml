@@ -1,4 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 카테고리 구분 형태 -->
+    <PreferenceCategory
+        android:title="비서 설정">
+
+        <EditTextPreference
+            android:key="setting_ep_nickName"
+            android:title="비서 이름 설정"
+            android:summary="비서의 이름을 설정할 수 있습니다."/>
+
+        <ListPreference
+            android:key="setting_lp_voiceSelect"
+            android:entries="@array/array_voice"
+            android:entryValues="@array/array_voice"
+            android:dialogTitle="비서 목소리 설정"
+            android:title="비서 목소리 설정"
+            android:summary="비서 목소리를 설정할 수 있습니다." />
+
+        <SwitchPreference
+            android:key="setting_sp_otherSecretaryFired"
+            android:title="타 비서 프로그램 해고하기"
+            android:summary="타 비서 프로그램을 해고할 수 있습니다."/>
+
+        <PreferenceScreen
+            android:key="setting_ps_language"
+            android:title="언어 설정"
+            android:summary="한국어">
+
+            <Preference
+                android:key="setting_p_kor"
+                android:title="한국어"/>
+
+            <Preference
+                android:key="setting_p_eng"
+                android:title="영어"/>
+
+            <Preference
+                android:key="setting_p_jp"
+                android:title="일본어"/>
+
+
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="표시">
+
+        <SwitchPreference
+            android:key="setting_sp_secretarySay"
+            android:title="비서가 말한 내용표시"
+            android:summary="비서가 말하는 내용을 화면에 표시해 줍니다."/>
+
+        <SwitchPreference
+            android:key="setting_sp_userSay"
+            android:title="사용자가 말한 내용표시"
+            android:summary="사용자가 말하는 내용을 화면에 표시해 줍니다."/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
