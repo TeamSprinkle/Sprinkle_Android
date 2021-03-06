@@ -6,9 +6,11 @@ import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
@@ -17,15 +19,18 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.sprinkle_android.R;
 import com.example.sprinkle_android.adapter.Code;
+import com.example.sprinkle_android.connection.SprinkleHttpURLConnection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class InitActivity extends AppCompatActivity {
 
@@ -36,17 +41,86 @@ public class InitActivity extends AppCompatActivity {
     private String emailType = null;
     private final int USERINFO_REQUEST_CODE = 0;
     private boolean test = false;
+    private static final String url = "/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init);
 
+        //저장된 값을 불러오기 위해 같은 네임파일을 찾음.
+        SharedPreferences sf = getSharedPreferences("statusFile",MODE_PRIVATE);
+
         checkPermission();
         getDeviceInfo();
         getAddressBook();
-        getUserInfo();
+//        getUserInfo();
 
+        //initStatus라는 key에 저장된 값이 있는지 확인. 아무값도 들어있지 않으면 ""를 반환
+        String initStatus = sf.getString("initStatus","");
+        if(!initStatus.equals("true"))
+        {
+            //init 메소드 실행.
+            initUserInfo();
+
+            // initUserInfo() 메소드가 성공적으로 수행되면 initStatus를 true로 변경.
+
+//            // Activity가 종료되기 전에 저장한다.
+//            //SharedPreferences를 sFile이름, 기본모드로 설정
+//            SharedPreferences sharedPreferences = getSharedPreferences("sFile",MODE_PRIVATE);
+//
+//            //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
+//            SharedPreferences.Editor editor = sharedPreferences.edit();
+//            String text = editText.getText().toString(); // 사용자가 입력한 저장할 데이터
+//            editor.putString("text",text); // key, value를 이용하여 저장하는 형태
+//            //다양한 형태의 변수값을 저장할 수 있다.
+//            //editor.putString();
+//            //editor.putBoolean();
+//            //editor.putFloat();
+//            //editor.putLong();
+//            //editor.putInt();
+//            //editor.putStringSet();
+//
+//            //최종 커밋
+//            editor.commit();
+
+        }
+    }
+
+    private void initUserInfo()
+    {
+        try {
+
+            // 예를들어 로그인관련 POST 요청을한다.
+            SprinkleHttpURLConnection conn = new SprinkleHttpURLConnection(this);
+
+            // R.string.url_1은 https://www.naver.com과 같은 특정사이트다.
+            // sID -> key, id -> value, sPWD -> key, password -> value
+            conn.execute(this.url, "POST");
+
+            // 동기로 진행된다. task가 성공하면 값을 return 받는다.
+            // 만약 error가 발생하면 callBackValue에 Error : 가 포함된다.
+            // return을 받을생각이 없다면 해당 코드줄은 주석처리해도된다. 단 작업의 성공여부는 알수없음
+            String callBackValue = conn.get();
+
+            // fail
+            if(callBackValue.isEmpty() || callBackValue.equals("") || callBackValue == null || callBackValue.contains("Error")) {
+                Toast.makeText(this, "등록되지 않은 사용자이거나, 전송오류입니다.", Toast.LENGTH_SHORT).show();
+                Log.d("MainActivity 결과값", "서버 요청 실패다");
+            }
+            // success
+            else {
+                Log.d("MainActivity 결과값", callBackValue);
+                // TODO : callBackValue를 이용해서 코드기술
+            }
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            Log.d("MainActivity", "ExecutionException");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            Log.d("MainActivity", "InterruptedException");
+
+        }
     }
 
     private void checkPermission()
@@ -135,6 +209,7 @@ public class InitActivity extends AppCompatActivity {
         /* ※ android O(오레오)이상 부터는 manifests의 GET_ACCOUNTS 권한만으로는 앱에서 계정정보를 불러올 수 없다...
          아니 그럼 api를 수정했어야 되는거 아닙니까?
          그래서 사용자에게 권한을 받아야하고 AccountManager.newChooseAccountIntent() 또는 인증자의 특정한 메소드를 사용해야 한다.*/
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void getUserInfo()
     {
         Intent intent = AccountManager.newChooseAccountIntent(
