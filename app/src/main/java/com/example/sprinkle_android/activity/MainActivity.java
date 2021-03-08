@@ -2,6 +2,7 @@ package com.example.sprinkle_android.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -38,5 +39,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == RESULT_OK)
+        {
+            Log.d("MainActivity","퍼미션 받기 성공");
+        }
+        else if(resultCode == RESULT_CANCELED)
+        {
+            Log.d("MainActivity","퍼미션 거절..");
+            finish();
+        }
     }
 }

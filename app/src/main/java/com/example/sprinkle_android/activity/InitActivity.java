@@ -18,6 +18,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,6 +38,7 @@ public class InitActivity extends AppCompatActivity {
     private List<String> data = new ArrayList<String>();
     private String androidId = null;
     private String phoneNumber = null;
+    private boolean resCheck = false;
     private String userEmail = null;
     private String emailType = null;
     private final int USERINFO_REQUEST_CODE = 0;
@@ -52,9 +54,6 @@ public class InitActivity extends AppCompatActivity {
         SharedPreferences sf = getSharedPreferences("statusFile",MODE_PRIVATE);
 
         checkPermission();
-        getDeviceInfo();
-        getAddressBook();
-//        getUserInfo();
 
         //initStatus라는 key에 저장된 값이 있는지 확인. 아무값도 들어있지 않으면 ""를 반환
         String initStatus = sf.getString("initStatus","");
@@ -127,16 +126,16 @@ public class InitActivity extends AppCompatActivity {
     {
         //if(ContextCompat.checkSelfPermission("컨텍스트 정보의 자리","요청할 권한") != PackageManager.PERMISSION_GRANTED)
         // checkSelfPermission()의 리턴값은 요청한 권한이 수락되었을때 PERMISSION_GRANTED를 리턴한다.
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_CONTACTS) == PackageManager.PERMISSION_GRANTED // Manifest.permission.WRITE_CONTACTS 승인되었을 때
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED // Manifest.permission.READ_CONTACTS 승인되었을 때
-                && ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED // Manifest.permission.READ_PHONE_STATE 승인되었을 때
-                && ContextCompat.checkSelfPermission(this,Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED // Manifest.permission.CALL_PHONE 승인되었을 때
-                && ContextCompat.checkSelfPermission(this,Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED // Manifest.permission.GET_ACCOUNTS 승인되었을 때
-                && ContextCompat.checkSelfPermission(this,Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED // Manifest.permission.INTERNET 승인되었을 때
-                && ContextCompat.checkSelfPermission(this,Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED // Manifest.permission.RECORD_AUDIO 승인되었을 때
-                && ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_CALENDAR) == PackageManager.PERMISSION_GRANTED // Manifest.permission.WRITE_CALENDAR 승인되었을 때
-                && ContextCompat.checkSelfPermission(this,Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {// Manifest.permission.READ_CALENDAR 승인되었을 때
-            // 모든 권한이 수락되었을 때 MainActivity로 넘어간다.
+            if(ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED // Manifest.permission.WRITE_CONTACTS 승인되지 않았을 떄
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED // Manifest.permission.READ_CONTACTS 승인되지 않았을 떄
+                || ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED // Manifest.permission.READ_PHONE_STATE 승인되지 않았을 떄
+                || ContextCompat.checkSelfPermission(this,Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED // Manifest.permission.CALL_PHONE 승인되지 않았을 떄
+                || ContextCompat.checkSelfPermission(this,Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED // Manifest.permission.GET_ACCOUNTS 승인되지 않았을 떄
+                || ContextCompat.checkSelfPermission(this,Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED // Manifest.permission.INTERNET 승인되지 않았을 떄
+                || ContextCompat.checkSelfPermission(this,Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED // Manifest.permission.RECORD_AUDIO 승인되지 않았을 떄
+                || ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED // Manifest.permission.WRITE_CALENDAR 승인되지 않았을 떄
+                || ContextCompat.checkSelfPermission(this,Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {// Manifest.permission.READ_CALENDAR 승인되지 않았을 떄
+            ActivityCompat.requestPermissions(this, Code.PERMISSION_PROJECTION, 0);
         }
         else{
             //이 영역은 권한이 거부되었을 때
@@ -158,6 +157,44 @@ public class InitActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        Intent resIntent = new Intent();
+        int grantedCnt = 0;
+
+        for(int i = 0 ; i < permissions.length ; i++)
+        {
+            //System.out.println("퍼미션 확인 : " + permissions[i]);ff
+            //System.out.println("이건 뭐냐? : " + grantResults[i]);
+            if(grantResults[i] == PackageManager.PERMISSION_GRANTED)
+            {
+                grantedCnt++;
+            }
+        }
+
+        switch (requestCode)
+        {
+            case 0:
+                if(grantResults.length > 0 && grantedCnt < 10) // AVD로 확인중인데 전화관련 퍼미션이 허용되지 않아서 퍼미션 12개중 10개만 오는 상황.. 핸드폰으로 할때 12로 하고 AVD일때는 10으로 맞춰 놓고 하자...
+                {
+                    // 권한 하나라도 거부
+                    resCheck = false;
+                    setResult(RESULT_CANCELED,resIntent);
+                }
+                else
+                {
+                    // 권한 모두 허가
+                    resCheck = true;
+                    //getDeviceInfo();
+                    //getAddressBook();
+                    //getUserInfo();
+                    setResult(RESULT_OK,resIntent);
+                }
+                finish();
+        }
+    }
     public void getAddressBook()
     {
         ContentResolver resolver = getApplication().getContentResolver();
