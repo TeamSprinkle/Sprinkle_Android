@@ -36,6 +36,8 @@ public class ChatActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(manager); // LayoutManager 등록
         recyclerView.setAdapter(new MyAdapter(dataList));  // Adapter 등록
+
+        // 여기에 기능 수행하는 STT를 실행시키는 코드를 넣으면 된다...
     }
 
     public void initializeData()

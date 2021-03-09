@@ -1,6 +1,7 @@
 package com.example.sprinkle_android.activity;
 
 import android.Manifest;
+import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -51,41 +52,39 @@ public class InitActivity extends AppCompatActivity {
         setContentView(R.layout.activity_init);
 
         //저장된 값을 불러오기 위해 같은 네임파일을 찾음.
-        SharedPreferences sf = getSharedPreferences("statusFile",MODE_PRIVATE);
+        //SharedPreferences sf = getSharedPreferences("statusFile",MODE_PRIVATE);
 
         checkPermission();
 
         //initStatus라는 key에 저장된 값이 있는지 확인. 아무값도 들어있지 않으면 ""를 반환
-        String initStatus = sf.getString("initStatus","");
-        if(!initStatus.equals("true"))
-        {
-            //init 메소드 실행.
-            initUserInfo();
-
-            // initUserInfo() 메소드가 성공적으로 수행되면 initStatus를 true로 변경.
-
-//            // Activity가 종료되기 전에 저장한다.
-//            //SharedPreferences를 sFile이름, 기본모드로 설정
-//            SharedPreferences sharedPreferences = getSharedPreferences("sFile",MODE_PRIVATE);
+//        String initStatus = sf.getString("initStatus","");
+//        if(!initStatus.equals("true"))
+//        {
+//            //init 메소드 실행.
+//            initUserInfo();
 //
-//            //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
-//            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            String text = editText.getText().toString(); // 사용자가 입력한 저장할 데이터
-//            editor.putString("text",text); // key, value를 이용하여 저장하는 형태
-//            //다양한 형태의 변수값을 저장할 수 있다.
-//            //editor.putString();
-//            //editor.putBoolean();
-//            //editor.putFloat();
-//            //editor.putLong();
-//            //editor.putInt();
-//            //editor.putStringSet();
+//            // initUserInfo() 메소드가 성공적으로 수행되면 initStatus를 true로 변경.
 //
-//            //최종 커밋
-//            editor.commit();
-
-        }
+////            // Activity가 종료되기 전에 저장한다.
+////            //SharedPreferences를 sFile이름, 기본모드로 설정
+////            SharedPreferences sharedPreferences = getSharedPreferences("sFile",MODE_PRIVATE);
+////
+////            //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
+////            SharedPreferences.Editor editor = sharedPreferences.edit();
+////            String text = editText.getText().toString(); // 사용자가 입력한 저장할 데이터
+////            editor.putString("text",text); // key, value를 이용하여 저장하는 형태
+////            //다양한 형태의 변수값을 저장할 수 있다.
+////            //editor.putString();
+////            //editor.putBoolean();
+////            //editor.putFloat();
+////            //editor.putLong();
+////            //editor.putInt();
+////            //editor.putStringSet();
+////
+////            //최종 커밋
+////            editor.commit();
+//        }
     }
-
     private void initUserInfo()
     {
         try {
@@ -121,7 +120,6 @@ public class InitActivity extends AppCompatActivity {
 
         }
     }
-
     private void checkPermission()
     {
         //if(ContextCompat.checkSelfPermission("컨텍스트 정보의 자리","요청할 권한") != PackageManager.PERMISSION_GRANTED)
@@ -156,7 +154,6 @@ public class InitActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, Code.PERMISSION_PROJECTION,0);
         }
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -166,14 +163,13 @@ public class InitActivity extends AppCompatActivity {
 
         for(int i = 0 ; i < permissions.length ; i++)
         {
-            //System.out.println("퍼미션 확인 : " + permissions[i]);ff
+            //System.out.println("퍼미션 확인 : " + permissions[i]);
             //System.out.println("이건 뭐냐? : " + grantResults[i]);
             if(grantResults[i] == PackageManager.PERMISSION_GRANTED)
             {
                 grantedCnt++;
             }
         }
-
         switch (requestCode)
         {
             case 0:
@@ -189,7 +185,7 @@ public class InitActivity extends AppCompatActivity {
                     resCheck = true;
                     //getDeviceInfo();
                     //getAddressBook();
-                    //getUserInfo();
+                    getUserInfo();
                     setResult(RESULT_OK,resIntent);
                 }
                 finish();
@@ -246,34 +242,30 @@ public class InitActivity extends AppCompatActivity {
         /* ※ android O(오레오)이상 부터는 manifests의 GET_ACCOUNTS 권한만으로는 앱에서 계정정보를 불러올 수 없다...
          아니 그럼 api를 수정했어야 되는거 아닙니까?
          그래서 사용자에게 권한을 받아야하고 AccountManager.newChooseAccountIntent() 또는 인증자의 특정한 메소드를 사용해야 한다.*/
-    @RequiresApi(api = Build.VERSION_CODES.M)
+
     public void getUserInfo()
     {
-        Intent intent = AccountManager.newChooseAccountIntent(
-                null, null, new String[]{"com.google"}, null,
-                null, null, null);
-        startActivityForResult(intent, USERINFO_REQUEST_CODE);
-    }
+        AccountManager acctMgr = AccountManager.get(this); // 사용자계정 전부를 불러온다.
+        Account[] acctArray = acctMgr.getAccounts(); // 사용자 계정들을 배열에 입력
+        int acctCnt = acctArray.length;
+        int row = 0; // 반복문에 사용할 변수
+        Account acct; // 필요한 사용자 계정을 입력할 때 쓸 String 변수
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+                /* AccountManager를 이용해 사용자가 핸드폰에 쓰고 있는 모든 계정, 앱과 연동 되어있는
+                계정들을 전부 불러오고 그걸 Account의 배열에 입력한다. 이를 통해서 필요한 계정정보를 찾을 준비가 됨. */
 
-        if (requestCode == USERINFO_REQUEST_CODE && resultCode == RESULT_OK) {
-            if (data != null) {
-                Bundle extras = data.getExtras();
-                this.userEmail = extras.getString(AccountManager.KEY_ACCOUNT_NAME);
-                this.emailType = extras.getString(AccountManager.KEY_ACCOUNT_TYPE);
-
-                Log.i("InitActivity","계정 : " + userEmail + "유형 : " + emailType);
-                finish();
-            }
-
-
-        }
-        else if(resultCode == RESULT_CANCELED)
+        // 핸드폰에 어떤 계정이 어떠한 유형으로 있는지 알아보는 코드
+        while( row < acctCnt)
         {
-            Log.i("InitActivity","취소 버튼 클릭");
+            acct = acctArray[row];
+            if(acct.type.equals("com.google"))
+            {
+                this.userEmail = acct.name;
+                this.emailType = acct.type;
+                break;
+            }
+            row ++;
         }
+        System.out.println("이메일 : " + this.userEmail +"\n타 입 : " + this.emailType);
     }
 }

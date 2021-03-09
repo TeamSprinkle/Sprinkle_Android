@@ -1,4 +1,4 @@
-package com.example.sprinkle_android.adapter;
+package com.example.sprinkle_android.recognition;
 
 import android.app.Application;
 import android.app.NotificationChannel;

@@ -26,6 +26,17 @@
         <activity android:name=".activity.ChatActivity"
             android:theme="@style/Transparent"/>
 
+        <service
+            android:name=".recognition.SpeakerRecognizer"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.speech.RecognitionService" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+
     </application>
 
 

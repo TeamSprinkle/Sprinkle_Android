@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.sprinkle_android.R;
-
+import com.example.sprinkle_android.recognition.SpeakerRecognizer;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -22,8 +22,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = new Intent(this,InitActivity.class);
-        startActivityForResult(intent,0);
+        Intent initIntent = new Intent(this,InitActivity.class);
+        initIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivityForResult(initIntent,0);
+
+
 
         this.setting_btn = (Button)findViewById(R.id.main_btn_setting);
 
@@ -43,6 +46,12 @@ public class MainActivity extends AppCompatActivity {
         if(resultCode == RESULT_OK)
         {
             Log.d("MainActivity","퍼미션 받기 성공");
+            startService(new Intent(MainActivity.this, SpeakerRecognizer.class));
+
+            // moveTaskToBack() : 현재의 activity가 속해있는 테스크를 백그라운드로 즉시 이동 시키는 함수.
+            // 전달인자로 true : 어떠한 경우라도 무조건 백그라운드로 이동시킨다. false : 현재의 activity가 루트(root)일 경우에만 백그라운드로 이동시킨다.
+            // ※루트(root)란 태스크의 가장 첫번째(바닥)의 activity임을 뜻한다.
+            moveTaskToBack(true);
         }
         else if(resultCode == RESULT_CANCELED)
         {
