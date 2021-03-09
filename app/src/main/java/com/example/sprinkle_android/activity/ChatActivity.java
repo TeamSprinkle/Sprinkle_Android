@@ -16,6 +16,8 @@ import com.example.sprinkle_android.adapter.MyAdapter;
 
 import java.util.ArrayList;
 
+import static java.lang.Thread.sleep;
+
 public class ChatActivity extends AppCompatActivity {
 
     private ArrayList<DataItem> dataList;

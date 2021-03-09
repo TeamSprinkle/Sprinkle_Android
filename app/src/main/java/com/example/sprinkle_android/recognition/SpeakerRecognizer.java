@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import static android.os.SystemClock.sleep;
 import static android.speech.SpeechRecognizer.ERROR_AUDIO;
 import static android.speech.SpeechRecognizer.ERROR_CLIENT;
 import static android.speech.SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS;
@@ -50,11 +51,13 @@ public class SpeakerRecognizer extends RecognitionService {
     boolean end = false;
     String resInputVoice = null;
 
+
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("호출순서 : ","1번");
+        System.out.println("onCreate()함수 호출/ 순서 : 1");
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        
         if (SpeechRecognizer.isRecognitionAvailable(getApplicationContext())) { //시스템에서 음성인식 서비스 실행이 가능하다면
             itIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             itIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
@@ -70,7 +73,7 @@ public class SpeakerRecognizer extends RecognitionService {
     private final Handler mHdrVoiceRecognitionState = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            Log.d("호출순서 : ","2번");
+            System.out.println("handleMessage()함수 호출/ 순서 : 2");
             switch (msg.what) {
                 case MSG_VOICE_RECO_READY:
                     break;
@@ -92,7 +95,7 @@ public class SpeakerRecognizer extends RecognitionService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("호출순서 : ","3번");
+        System.out.println("onStartCommand()함수 호출/ 순서 : 4");
         Intent notificationIntent = new Intent(this, MainActivity.class);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this
@@ -105,6 +108,7 @@ public class SpeakerRecognizer extends RecognitionService {
                 .setContentIntent(pendingIntent)
                 .build();
 
+        // 아래 코드가 있으면 일단 오류... 근데 이 함수가 호출되면 알림바?에 표시됨.. 원래라면 서비스 호출후 5초이내에 이 메소드가 호출되지 않으면 종료된다고 하는데...왜 종료되지 않는 걸까?
         //startForeground(1, notification);
 
         return START_STICKY;
@@ -114,28 +118,31 @@ public class SpeakerRecognizer extends RecognitionService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("호출순서 : ","9번");
+        System.out.println("onDestroy()함수 호출/ 순서 : 10");
         end = true;
         mSrRecognizer.destroy();
         mHdrVoiceRecognitionState.sendEmptyMessage(MSG_VOICE_RECO_READY); //음성인식 서비스 다시 시작
-        if (mAudioManager != null)
-            mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_UNMUTE, 0);
     }
 
     @Override
     protected void onStartListening(Intent recognizerIntent, RecognitionService.Callback listener) {
-        Log.d("호출순서 : ","11번");
+        System.out.println("onStartListening()함수 호출/ 순서 : 11");
     }
 
     public void startListening() {
-        Log.d("호출순서 : ","2번");
+        System.out.println("startListening()함수 호출/ 순서 : 3");
         if(!end){
-            //음성인식을 시작하기 위해 Mute
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (!mAudioManager.isStreamMute(AudioManager.STREAM_MUSIC)) {
-                    mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
+            // 음성인식 시작할때 띠링~ 소리 제거하는 코드
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 마시맬로우 버전 이상인 경우
+                if (mAudioManager.isStreamMute(AudioManager.STREAM_MUSIC)) { // 디바이스가 음소거인 경우
+                    System.out.println("음소거");
+                    mAudioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_MUTE, 0); // 이소리가 비프음 제거인듯..
+                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
+                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_MUTE, 0);
+                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0);
+                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
                 }
-            } else {
+            } else { // 마시맬로우 버전 이하인 경우
                 mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
             }
             if (!mBoolVoiceRecognitionStarted) { // 최초의 실행이거나 인식이 종료된 후에 다시 인식을 시작하려 할 때
@@ -154,7 +161,7 @@ public class SpeakerRecognizer extends RecognitionService {
 
     public void stopListening() //Override 함수가 아닌 한번만 호출되는 함수 음성인식이 중단될 때
     {
-        Log.d("호출순서 : ","6번");
+        System.out.println("stopListening()함수 호출/ 순서 : 7");
         try {
             if (mSrRecognizer != null && mBoolVoiceRecognitionStarted) {
                 mSrRecognizer.stopListening(); //음성인식 Override 중단을 호출
@@ -168,13 +175,13 @@ public class SpeakerRecognizer extends RecognitionService {
 
     @Override
     protected void onCancel(RecognitionService.Callback listener) {
-        Log.d("호출순서 : ","7번");
+        System.out.println("onCancel()함수 호출/ 순서 : 8");
         mSrRecognizer.cancel();
     }
 
     @Override
     protected void onStopListening(RecognitionService.Callback listener) { //음성인식 Override 함수의 종료부분
-        Log.d("호출순서 : ","8번");
+        System.out.println("onStopListening()함수 호출/ 순서 : 9");
         mHdrVoiceRecognitionState.sendEmptyMessage(MSG_VOICE_RECO_RESTART); //음성인식 서비스 다시 시작
     }
 
@@ -182,12 +189,12 @@ public class SpeakerRecognizer extends RecognitionService {
         @Override
         public void onRmsChanged(float rmsdB) {
             // db이 증가하거나 낮아질때 호출 됨
-            Log.d("호출순서 : ","5번");
+            System.out.println("onRmsChanged()함수 호출/ 순서 : 6");
         }
 
         @Override
         public void onResults(Bundle results) {
-            Log.d("호출순서 : ","10번");
+            System.out.println("onResults()함수 호출/ 순서 : 12");
             //Recognizer KEY를 사용하여 인식한 결과값을 가져오는 코드
             String key = "";
             key = SpeechRecognizer.RESULTS_RECOGNITION;
@@ -197,11 +204,15 @@ public class SpeakerRecognizer extends RecognitionService {
             StringTokenizer strTokenizer = new StringTokenizer(Arrays.toString(rs),"[]");
             resInputVoice = strTokenizer.nextToken();
             if(resInputVoice.equals("시리야")) {
-                System.out.println("여기 오는거니?");
-                Intent chatIntent = new Intent(getApplicationContext(),ChatActivity.class);
-                chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(chatIntent);
 
+                sleep(1000);
+                Intent chatIntent = new Intent(getApplicationContext(),ChatActivity.class);
+                // Intent Flag 정리 관련 글 https://kylblog.tistory.com/21
+                // 아래 플래그 값을 써야 ChatActivity 아래에 MainActivity 가 깔리는걸 방지할 수 있다.
+                chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                chatIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                chatIntent.putExtra("input_voice",resInputVoice);
+                startActivity(chatIntent);
             }
             else {
                 startListening();
@@ -210,12 +221,12 @@ public class SpeakerRecognizer extends RecognitionService {
 
         @Override
         public void onReadyForSpeech(Bundle params) {
-            Log.d("호출순서 : ","4번");
+            System.out.println("onReadyForSpeech()함수 호출/ 순서 : 5");
         }
 
         @Override
         public void onEndOfSpeech() {
-            Log.d("호출순서 : ","12번");
+            System.out.println("onEndOfSpeech()함수 호출/ 순서 : 13");
         }
 
         @Override
@@ -265,22 +276,22 @@ public class SpeakerRecognizer extends RecognitionService {
         }
         @Override
         public void onBeginningOfSpeech() {
-            Log.d("호출순서 : ","13번");
+            System.out.println("onBeginningOfSpeech()함수 호출/ 순서 : 14");
         }
 
         @Override
         public void onBufferReceived(byte[] buffer) {
-            Log.d("호출순서 : ","14번");
+            System.out.println("onBufferReceived()함수 호출/ 순서 : 15");
         }
 
         @Override
         public void onEvent(int eventType, Bundle params) {
-            Log.d("호출순서 : ","15번");
+            System.out.println("onEvent()함수 호출/ 순서 : 16");
         }
 
         @Override
         public void onPartialResults(Bundle partialResults) { //부분 인식을 성공 했을 때
-            Log.d("호출순서 : ","16번");
+            System.out.println("onPartialResults()함수 호출/ 순서 : 17");
         }
     };
 }

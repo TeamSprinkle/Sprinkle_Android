@@ -13,14 +13,18 @@ import com.example.sprinkle_android.R;
 import com.example.sprinkle_android.recognition.SpeakerRecognizer;
 
 
+
 public class MainActivity extends AppCompatActivity {
 
     private Button setting_btn;
+    public static MainActivity ma;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ma = MainActivity.this;
 
         Intent initIntent = new Intent(this,InitActivity.class);
         initIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
