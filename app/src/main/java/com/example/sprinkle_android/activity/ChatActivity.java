@@ -54,11 +54,9 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setAdapter(new MyAdapter(dataList));  // Adapter 등록
 
         // 여기에 기능 수행하는 STT를 실행시키는 코드를 넣으면 된다...
-
         mRecognizer= SpeechRecognizer.createSpeechRecognizer(this);
         mRecognizer.setRecognitionListener(listener);
         mRecognizer.startListening(speechRecognitionIntent);
-        // 동적으로 RecyclerView를 동적으로 채팅처럼 보이게 하려면 Adapter가 필요하다....
     }
 
     public void initializeData()
