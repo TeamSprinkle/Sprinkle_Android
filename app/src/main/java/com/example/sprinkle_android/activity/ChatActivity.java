@@ -58,6 +58,7 @@ public class ChatActivity extends AppCompatActivity {
         mRecognizer= SpeechRecognizer.createSpeechRecognizer(this);
         mRecognizer.setRecognitionListener(listener);
         mRecognizer.startListening(speechRecognitionIntent);
+        // 동적으로 RecyclerView를 동적으로 채팅처럼 보이게 하려면 Adapter가 필요하다....
     }
 
     public void initializeData()
