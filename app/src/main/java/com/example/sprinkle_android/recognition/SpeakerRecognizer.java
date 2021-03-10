@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-import static android.os.SystemClock.sleep;
 import static android.speech.SpeechRecognizer.ERROR_AUDIO;
 import static android.speech.SpeechRecognizer.ERROR_CLIENT;
 import static android.speech.SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS;
@@ -134,7 +133,7 @@ public class SpeakerRecognizer extends RecognitionService {
         if(!end){
             // 음성인식 시작할때 띠링~ 소리 제거하는 코드
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 마시맬로우 버전 이상인 경우
-                if (mAudioManager.isStreamMute(AudioManager.STREAM_MUSIC)) { // 디바이스가 음소거인 경우
+                if (!mAudioManager.isStreamMute(AudioManager.STREAM_MUSIC)) { // 디바이스가 음소거가 아닌경우
                     System.out.println("음소거");
                     mAudioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_MUTE, 0); // 이소리가 비프음 제거인듯..
                     //mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
@@ -204,8 +203,6 @@ public class SpeakerRecognizer extends RecognitionService {
             StringTokenizer strTokenizer = new StringTokenizer(Arrays.toString(rs),"[]");
             resInputVoice = strTokenizer.nextToken();
             if(resInputVoice.equals("시리야")) {
-
-                sleep(1000);
                 Intent chatIntent = new Intent(getApplicationContext(),ChatActivity.class);
                 // Intent Flag 정리 관련 글 https://kylblog.tistory.com/21
                 // 아래 플래그 값을 써야 ChatActivity 아래에 MainActivity 가 깔리는걸 방지할 수 있다.
