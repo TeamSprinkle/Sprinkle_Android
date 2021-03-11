@@ -29,31 +29,27 @@ import static android.os.SystemClock.sleep;
 public class ChatActivity extends AppCompatActivity {
 
     private ArrayList<DataItem> dataList;
-    Intent receiveDataIntent;
-    Intent speechRecognitionIntent;
-    SpeechRecognizer mRecognizer;
+    private Intent receiveDataIntent;
+    private Intent speechRecognitionIntent;
+    private SpeechRecognizer mRecognizer;
     protected AudioManager mAudioManager;
+    private LinearLayoutManager manager;
+    private RecyclerView recyclerView;
+    private MyAdapter myAdapter;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // 아래의 함수 대신
-        // 사용자가 음성 입력을 하면 RIGHT_CONTENT에 메시지를 보내주고,
-        // 시스템이 응답할때 TTS와 함께 LEFT_CONTENT에 메시지를 보내준다.
         this.initializeData();
 
-        receiveDataIntent = getIntent();
-        userText(receiveDataIntent.getStringExtra("input_voice"));
-
-        RecyclerView recyclerView = findViewById(R.id.chat_rView_recyclerView);
-
-        LinearLayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
-
-        recyclerView.setLayoutManager(manager); // LayoutManager 등록
-        recyclerView.setAdapter(new MyAdapter(dataList));  // Adapter 등록
-
         // 여기에 기능 수행하는 STT를 실행시키는 코드를 넣으면 된다...
+        userText(receiveDataIntent.getStringExtra("input_voice")); // 사용자가 하는 말을 텍스트화 시켜서 리스트에 추가
+
         startListening();
     }
 
@@ -80,14 +76,26 @@ public class ChatActivity extends AppCompatActivity {
         } else { // 마시맬로우 버전 이하인 경우
             mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
         }
+
+        receiveDataIntent = getIntent();
+
+        recyclerView = findViewById(R.id.chat_rView_recyclerView);
+
+        manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
+
+        recyclerView.setLayoutManager(manager); // LayoutManager 등록
+        myAdapter = new MyAdapter(dataList); // Adapter 생성
+        recyclerView.setAdapter(myAdapter);  // Adapter 등록
     }
     public void secretaryText(String voiceData)
     {
-        dataList.add(new DataItem(voiceData,  Code.ViewType.LEFT_CONTENT));
+        dataList.add(new DataItem(voiceData,  Code.ViewType.LEFT_CONTENT)); // 시스템의 말 데이터 추가
+        myAdapter.notifyDataSetChanged(); // 리스트의 데이터가 변경면 갱신 시켜주는 함수
     }
     public void userText(String voiceData)
     {
-        dataList.add(new DataItem(voiceData,  Code.ViewType.RIGHT_CONTENT));
+        dataList.add(new DataItem(voiceData,  Code.ViewType.RIGHT_CONTENT)); // 사용자의 말 데이터 추가
+        myAdapter.notifyDataSetChanged(); // 리스트의 데이터가 변경면 갱신 시켜주는 함수
     }
 
     @Override
