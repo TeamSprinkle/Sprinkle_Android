@@ -54,9 +54,7 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setAdapter(new MyAdapter(dataList));  // Adapter 등록
 
         // 여기에 기능 수행하는 STT를 실행시키는 코드를 넣으면 된다...
-        mRecognizer= SpeechRecognizer.createSpeechRecognizer(this);
-        mRecognizer.setRecognitionListener(listener);
-        mRecognizer.startListening(speechRecognitionIntent);
+        startListening();
     }
 
     public void initializeData()
@@ -119,6 +117,14 @@ public class ChatActivity extends AppCompatActivity {
                 return super.onTouchEvent(event);
         }
     }
+
+    public void startListening()
+    {
+        mRecognizer= SpeechRecognizer.createSpeechRecognizer(this);
+        mRecognizer.setRecognitionListener(listener);
+        mRecognizer.startListening(speechRecognitionIntent);
+    }
+
     // RecognizerIntent 객체에 할당할 listener 생성 test
     private RecognitionListener listener = new RecognitionListener()
     {
