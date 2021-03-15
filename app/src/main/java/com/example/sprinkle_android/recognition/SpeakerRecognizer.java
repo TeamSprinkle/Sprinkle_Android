@@ -134,16 +134,16 @@ public class SpeakerRecognizer extends RecognitionService {
         if(!end){
             // 음성인식 시작할때 띠링~ 소리 제거하는 코드
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 마시맬로우 버전 이상인 경우
-                if (!mAudioManager.isStreamMute(AudioManager.STREAM_MUSIC)) { // 디바이스가 음소거가 아닌경우
-                    System.out.println("음소거");
-                    mAudioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_MUTE, 0); // 이소리가 비프음 제거인듯..
-                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
-                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_MUTE, 0);
-                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0);
-                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
+                if (!mAudioManager.isStreamMute(AudioManager.STREAM_NOTIFICATION)) { // 알림소리가 음소거가 아닌경우
+                    System.out.println("알림 음소거");
+                    mAudioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_MUTE, 0); // 알림 뮤트
+                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0); // 미디어 뮤트
+                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_MUTE, 0); // 알람 뮤트(알림x)
+                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0); // 벨소리 뮤트
+                    //mAudioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0); // 시스템 뮤트
                 }
             } else { // 마시맬로우 버전 이하인 경우
-                mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
+                mAudioManager.setStreamMute(AudioManager.STREAM_NOTIFICATION, true);
             }
             if (!mBoolVoiceRecognitionStarted) { // 최초의 실행이거나 인식이 종료된 후에 다시 인식을 시작하려 할 때
                 if (mSrRecognizer == null) {

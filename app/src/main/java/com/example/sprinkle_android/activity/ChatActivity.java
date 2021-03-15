@@ -28,7 +28,7 @@ import java.util.Locale;
 
 import static android.os.SystemClock.sleep;
 
-public class ChatActivity extends AppCompatActivity implements TextToSpeech.OnInitListener{
+public class ChatActivity extends AppCompatActivity{
 
     private ArrayList<DataItem> dataList;
     private Intent receiveDataIntent;
@@ -39,6 +39,7 @@ public class ChatActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private RecyclerView recyclerView;
     private MyAdapter myAdapter;
     private TextToSpeech tts;
+    private boolean ttsInitRes;
 
 
 
@@ -49,12 +50,12 @@ public class ChatActivity extends AppCompatActivity implements TextToSpeech.OnIn
         setContentView(R.layout.activity_chat);
 
         this.initializeData();
-
+        sleep(1000);
         // 여기에 기능 수행하는 STT를 실행시키는 코드를 넣으면 된다...
         userText(receiveDataIntent.getStringExtra("input_userVoice")); // 사용자가 하는 말을 텍스트화 시켜서 리스트에 추가
+        System.out.println(receiveDataIntent.getStringExtra("input_secretaryVoice"));
         secretaryText(receiveDataIntent.getStringExtra("input_secretaryVoice"));
-
-        startListening();
+        //startListening();
     }
 
     public void initializeData()
@@ -68,17 +69,16 @@ public class ChatActivity extends AppCompatActivity implements TextToSpeech.OnIn
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 마시맬로우 버전 이상인 경우
-            if (!mAudioManager.isStreamMute(AudioManager.STREAM_MUSIC)) { // 디바이스가 음소거인 경우
-                System.out.println("음소거 해제");
-                sleep(1000);
-                mAudioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_UNMUTE, 0); // 이소리가 비프음 제거인듯..
-                //mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
-                //mAudioManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_MUTE, 0);
-                //mAudioManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0);
-                //mAudioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
+            if (mAudioManager.isStreamMute(AudioManager.STREAM_NOTIFICATION)) { // 디바이스가 음소거인 경우
+                System.out.println("알림 음소거 해제");
+                mAudioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_UNMUTE, 0); // 알림 언뮤트
+                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_UNMUTE, 0); // 미디어 언뮤트
+                //mAudioManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_UNMUTE, 0); // 알람 언뮤트(알림x)
+                //mAudioManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_UNMUTE, 0); // 벨소리 언뮤트
+                //mAudioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_UNMUTE, 0); // 시스템 언뮤트
             }
         } else { // 마시맬로우 버전 이하인 경우
-            mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
+            mAudioManager.setStreamMute(AudioManager.STREAM_NOTIFICATION, false);
         }
 
         receiveDataIntent = getIntent();
@@ -90,20 +90,49 @@ public class ChatActivity extends AppCompatActivity implements TextToSpeech.OnIn
         recyclerView.setLayoutManager(manager); // LayoutManager 등록
         myAdapter = new MyAdapter(dataList); // Adapter 생성
         recyclerView.setAdapter(myAdapter);  // Adapter 등록
+
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+
+                if (status == TextToSpeech.SUCCESS)
+                {
+                    int result = tts.setLanguage(Locale.KOREA);
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED)
+                    {
+                        Log.e("TTS","This Language is not supported");
+                    }
+                    else
+                    {
+                        Log.d("TTS","Initialization Success");
+                        //secretaryText("테스트 해보는거야");
+                    }
+                }
+                else
+                {
+                    Log.e("TTS", "Initialization Failed!");
+                }
+            }
+        });
     }
     public void secretaryText(String voiceData)
     {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 마시맬로우 버전 이상인 경우
+            if (mAudioManager.isStreamMute(AudioManager.STREAM_MUSIC)) { // 미디어가 뮤트라면
+                System.out.println("미디어 음소거 해제");
+                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_UNMUTE, 0); // 미디어 언뮤트
+            }
+        }
+        speakOut(voiceData);
         dataList.add(new DataItem(voiceData,  Code.ViewType.LEFT_CONTENT)); // 시스템의 말 데이터 추가
         myAdapter.notifyDataSetChanged(); // 리스트의 데이터가 변경되면 갱신 시켜주는 함수
-        speakOut(voiceData);
     }
 
     private void speakOut(String voiceData)
     {
-        CharSequence text = voiceData;
-        tts.setPitch((float) 0.6);
-        tts.setSpeechRate((float) 0.1);
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH,null,"id1");
+        tts.setPitch((float) 1.0);
+        tts.setSpeechRate((float) 1.0);
+        tts.speak(voiceData, TextToSpeech.QUEUE_FLUSH,null,"id1");
     }
 
     @Override
@@ -113,28 +142,6 @@ public class ChatActivity extends AppCompatActivity implements TextToSpeech.OnIn
         {
             tts.stop();
             tts.shutdown();
-        }
-    }
-    @Override
-    public void onInit(int status)
-    {
-
-        if (status == TextToSpeech.SUCCESS)
-        {
-            int result = tts.setLanguage(Locale.KOREA);
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED)
-            {
-                System.out.println("This Language is not supported");
-            }
-            else
-            {
-                // tts 함수 호출
-                //speakOut(voiceData);
-            }
-        }
-        else
-        {
-            Log.e("TTS", "initialization Failed!");
         }
     }
     public void userText(String voiceData)

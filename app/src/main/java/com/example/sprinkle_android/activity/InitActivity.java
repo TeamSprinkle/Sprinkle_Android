@@ -106,7 +106,6 @@ public class InitActivity extends AppCompatActivity {
 
             // fail
             if(callBackValue.isEmpty() || callBackValue.equals("") || callBackValue == null || callBackValue.contains("Error")) {
-                Toast.makeText(this, "등록되지 않은 사용자이거나, 전송오류입니다.", Toast.LENGTH_SHORT).show();
                 Log.d("MainActivity 결과값", "서버 요청 실패다");
             }
             // success
