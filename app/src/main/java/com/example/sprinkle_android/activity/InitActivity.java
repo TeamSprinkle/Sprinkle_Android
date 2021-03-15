@@ -63,7 +63,7 @@ public class InitActivity extends AppCompatActivity {
 //        if(!initStatus.equals("true"))
 //        {
 //            //init 메소드 실행.
-            initUserInfo();
+//fff            initUserInfo();
 //
 //            // initUserInfo() 메소드가 성공적으로 수행되면 initStatus를 true로 변경.
 //
@@ -193,6 +193,7 @@ public class InitActivity extends AppCompatActivity {
                     getDeviceInfo();
                     getAddressBook();
                     getUserInfo();
+                    initUserInfo();
                     setResult(RESULT_OK,resIntent);
                 }
                 finish();
