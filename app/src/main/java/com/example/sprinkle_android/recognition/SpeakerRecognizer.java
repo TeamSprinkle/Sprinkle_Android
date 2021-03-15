@@ -40,15 +40,16 @@ import static com.example.sprinkle_android.recognition.App.CHANEL_ID;
 
 public class SpeakerRecognizer extends RecognitionService {
 
-    public static final int MSG_VOICE_RECO_READY = 0;
-    public static final int MSG_VOICE_RECO_END = 1;
-    public static final int MSG_VOICE_RECO_RESTART = 2;
+    private static final int MSG_VOICE_RECO_READY = 0;
+    private static final int MSG_VOICE_RECO_END = 1;
+    private static final int MSG_VOICE_RECO_RESTART = 2;
     private SpeechRecognizer mSrRecognizer;
-    boolean mBoolVoiceRecognitionStarted;
+    private boolean mBoolVoiceRecognitionStarted;
     protected AudioManager mAudioManager;
-    Intent itIntent;//음성인식 Intent
-    boolean end = false;
-    String resInputVoice = null;
+    private Intent itIntent;//음성인식 Intent
+    private boolean end = false;
+    private String resInputVoice = null;
+    private String secretaryName = "시리야";
 
 
     @Override
@@ -202,13 +203,14 @@ public class SpeakerRecognizer extends RecognitionService {
             mResult.toArray(rs);
             StringTokenizer strTokenizer = new StringTokenizer(Arrays.toString(rs),"[]");
             resInputVoice = strTokenizer.nextToken();
-            if(resInputVoice.equals("시리야")) {
+            if(resInputVoice.equals(secretaryName)) {
                 Intent chatIntent = new Intent(getApplicationContext(),ChatActivity.class);
                 // Intent Flag 정리 관련 글 https://kylblog.tistory.com/21
                 // 아래 플래그 값을 써야 ChatActivity 아래에 MainActivity 가 깔리는걸 방지할 수 있다.
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                chatIntent.putExtra("input_voice",resInputVoice);
+                chatIntent.putExtra("input_userVoice",resInputVoice);
+                chatIntent.putExtra("input_secretaryVoice","네");
                 startActivity(chatIntent);
             }
             else {

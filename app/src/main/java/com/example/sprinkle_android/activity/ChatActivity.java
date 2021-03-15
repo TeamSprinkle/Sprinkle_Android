@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
@@ -23,10 +24,11 @@ import com.example.sprinkle_android.adapter.DataItem;
 import com.example.sprinkle_android.adapter.MyAdapter;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import static android.os.SystemClock.sleep;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements TextToSpeech.OnInitListener{
 
     private ArrayList<DataItem> dataList;
     private Intent receiveDataIntent;
@@ -36,6 +38,7 @@ public class ChatActivity extends AppCompatActivity {
     private LinearLayoutManager manager;
     private RecyclerView recyclerView;
     private MyAdapter myAdapter;
+    private TextToSpeech tts;
 
 
 
@@ -48,7 +51,8 @@ public class ChatActivity extends AppCompatActivity {
         this.initializeData();
 
         // 여기에 기능 수행하는 STT를 실행시키는 코드를 넣으면 된다...
-        userText(receiveDataIntent.getStringExtra("input_voice")); // 사용자가 하는 말을 텍스트화 시켜서 리스트에 추가
+        userText(receiveDataIntent.getStringExtra("input_userVoice")); // 사용자가 하는 말을 텍스트화 시켜서 리스트에 추가
+        secretaryText(receiveDataIntent.getStringExtra("input_secretaryVoice"));
 
         startListening();
     }
@@ -90,12 +94,53 @@ public class ChatActivity extends AppCompatActivity {
     public void secretaryText(String voiceData)
     {
         dataList.add(new DataItem(voiceData,  Code.ViewType.LEFT_CONTENT)); // 시스템의 말 데이터 추가
-        myAdapter.notifyDataSetChanged(); // 리스트의 데이터가 변경면 갱신 시켜주는 함수
+        myAdapter.notifyDataSetChanged(); // 리스트의 데이터가 변경되면 갱신 시켜주는 함수
+        speakOut(voiceData);
+    }
+
+    private void speakOut(String voiceData)
+    {
+        CharSequence text = voiceData;
+        tts.setPitch((float) 0.6);
+        tts.setSpeechRate((float) 0.1);
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH,null,"id1");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (tts != null)
+        {
+            tts.stop();
+            tts.shutdown();
+        }
+    }
+    @Override
+    public void onInit(int status)
+    {
+
+        if (status == TextToSpeech.SUCCESS)
+        {
+            int result = tts.setLanguage(Locale.KOREA);
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED)
+            {
+                System.out.println("This Language is not supported");
+            }
+            else
+            {
+                // tts 함수 호출
+                //speakOut(voiceData);
+            }
+        }
+        else
+        {
+            Log.e("TTS", "Initilization Failed!");
+        }
     }
     public void userText(String voiceData)
     {
         dataList.add(new DataItem(voiceData,  Code.ViewType.RIGHT_CONTENT)); // 사용자의 말 데이터 추가
-        myAdapter.notifyDataSetChanged(); // 리스트의 데이터가 변경면 갱신 시켜주는 함수
+        myAdapter.notifyDataSetChanged(); // 리스트의 데이터가 변경되면 갱신 시켜주는 함수
     }
 
     @Override
@@ -196,7 +241,7 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override public void onResults(Bundle results)
         {
-            // 말을 하면 ArrayList에 단어를 넣고 textView에 단어를 이어줍니다.
+            // 말을 하면 ArrayList에 단어를 넣고 textView에 단어를 이어준다.
             ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             String commandData = null;
             for(int i = 0; i < matches.size() ; i++)
@@ -205,6 +250,13 @@ public class ChatActivity extends AppCompatActivity {
             }
             userText(commandData);
             System.out.println(commandData);
+
+            // 설정 테스트
+            if(commandData.equals("설정"))
+            {
+                Intent settingIntent = new Intent(ChatActivity.this,SettingActivity.class);
+                startActivity(settingIntent);
+            }
         }
 
         @Override

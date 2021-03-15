@@ -6,7 +6,7 @@
         android:allowBackup="true"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="테스트"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sprinkle_android">
@@ -21,7 +21,8 @@
 
         <activity android:name=".activity.InitActivity"/>
 
-        <activity android:name=".activity.SettingActivity"/>
+        <activity android:name=".activity.SettingActivity"
+            android:parentActivityName=".activity.MainActivity"/>
 
         <activity android:name=".activity.ChatActivity"
             android:theme="@style/Transparent"/>

@@ -1,9 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Sprinkle_android" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.Sprinkle_android" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimaryVariant">@color/white</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -13,6 +13,9 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
         <item name="windowNoTitle">true</item>
+
+        <item name="android:statusBarColor" tools:targetApi="l" tools:ignore="DuplicateDefinition">@color/white</item> <!-- 상태바 흰색으로 바꾸기 -->
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item> <!-- 상태바 아이콘 검은색으로 바꾸기 -->
     </style>
 
     <style name="Transparent" parent="@style/Theme.AppCompat">

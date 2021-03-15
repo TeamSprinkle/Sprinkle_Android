@@ -16,8 +16,6 @@ import com.example.sprinkle_android.recognition.SpeakerRecognizer;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button setting_btn;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,16 +25,6 @@ public class MainActivity extends AppCompatActivity {
         initIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivityForResult(initIntent,0);
 
-
-        this.setting_btn = (Button)findViewById(R.id.main_btn_setting);
-
-        this.setting_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     @Override
