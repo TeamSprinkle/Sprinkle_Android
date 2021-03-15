@@ -46,7 +46,7 @@ public class InitActivity extends AppCompatActivity {
     private String emailType = null;
     private final int USERINFO_REQUEST_CODE = 0;
     private boolean test = false;
-    private static final String url = "/";
+    private static final String url = "/users/init";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

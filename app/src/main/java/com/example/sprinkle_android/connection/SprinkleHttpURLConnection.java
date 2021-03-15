@@ -42,8 +42,6 @@ public class SprinkleHttpURLConnection extends AsyncTask<String, Void, String> {
 
         int i = 0;
         for (i = 2; i < params.length; i += 2) {
-            System.out.println("params 1 : " + params[i]);
-            System.out.println("params 1 : " + params[i+1]);
             parameters = parameters + params[i] + "=" + params[i+1];
             if (i != params.length - 1) {
                 parameters += "&";
