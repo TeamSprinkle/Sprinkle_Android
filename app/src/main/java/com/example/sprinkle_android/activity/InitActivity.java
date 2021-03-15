@@ -85,16 +85,17 @@ public class InitActivity extends AppCompatActivity {
 ////            editor.commit();
 //        }
     }
+
     private void initUserInfo()
     {
         try {
 
-            // 예를들어 로그인관련 POST 요청을한다.
+            // POST 요청을한다.
             SprinkleHttpURLConnection conn = new SprinkleHttpURLConnection(this);
 
             // R.string.url_1은 https://www.naver.com과 같은 특정사이트다.
             // sID -> key, id -> value, sPWD -> key, password -> value
-            conn.execute(this.url, "POST");
+            conn.execute(this.url, "POST", "deviceId", this.androidId, "phoneNum", this.phoneNumber, "phonebooks", this.data.toString());
 
             // 동기로 진행된다. task가 성공하면 값을 return 받는다.
             // 만약 error가 발생하면 callBackValue에 Error : 가 포함된다.
