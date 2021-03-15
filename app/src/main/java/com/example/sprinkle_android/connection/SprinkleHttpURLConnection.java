@@ -47,7 +47,9 @@ public class SprinkleHttpURLConnection extends AsyncTask<String, Void, String> {
                 parameters.concat("&");
             }
         }
-        System.out.println("여기 " + parameters);
+
+        System.out.println("doInBackground parameter : " + parameters.toString());
+
         try {
             URL url = new URL(serverURL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
