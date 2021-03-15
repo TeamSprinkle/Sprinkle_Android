@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,15 +39,17 @@ public class SprinkleHttpURLConnection extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... params) {
         String serverURL = HOST.concat(params[0]); //url mapping
         String action = params[1]; // GET , POST 방식의 action 정보
-        String parameters = ""; // 전달인자로 보내는 정보
+        JSONObject parameters = new JSONObject(); // 전달인자로 보내는 정보
         String result = null;
-
-        int i = 0;
-        for (i = 2; i < params.length; i += 2) {
-            parameters = parameters + params[i] + "=" + params[i+1];
-            if (i != params.length - 1) {
-                parameters += "&";
+        
+        try {
+            int i = 0;
+            for (i = 2; i < params.length; i += 2) {
+                parameters.put(params[i], params[i+1]);
             }
+        }
+        catch (Exception e){
+            return "Error: " + e.getMessage();
         }
 
         System.out.println("doInBackground parameter : " + parameters);
@@ -64,7 +68,7 @@ public class SprinkleHttpURLConnection extends AsyncTask<String, Void, String> {
             conn.setDoOutput(true); //안드로이드가 서버로 보내는거를 트루
 
             OutputStream outStream = conn.getOutputStream();
-            outStream.write(parameters.getBytes("utf-8"));//parameters는 서버로보낼 스트링값등을 설정하는 것
+            outStream.write(parameters.toString().getBytes("utf-8"));//parameters는 서버로보낼 스트링값등을 설정하는 것
 
             int resCode = conn.getResponseCode(); // connect, send http reuqest, receive htttp request
 
