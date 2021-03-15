@@ -134,7 +134,7 @@ public class ChatActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
         else
         {
-            Log.e("TTS", "Initilization Failed!");
+            Log.e("TTS", "initialization Failed!");
         }
     }
     public void userText(String voiceData)
