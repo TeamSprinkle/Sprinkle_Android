@@ -87,6 +87,8 @@ public class InitActivity extends AppCompatActivity {
 ////            editor.commit();
 //        }
     }
+
+
     private void initUserInfo()
     {
         try {
@@ -121,6 +123,8 @@ public class InitActivity extends AppCompatActivity {
 
         }
     }
+
+
     private void checkPermission()
     {
         //if(ContextCompat.checkSelfPermission("컨텍스트 정보의 자리","요청할 권한") != PackageManager.PERMISSION_GRANTED)
@@ -155,6 +159,8 @@ public class InitActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, Code.PERMISSION_PROJECTION,0);
         }
     }
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

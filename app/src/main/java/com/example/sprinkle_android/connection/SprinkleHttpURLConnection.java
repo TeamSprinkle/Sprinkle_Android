@@ -42,13 +42,15 @@ public class SprinkleHttpURLConnection extends AsyncTask<String, Void, String> {
 
         int i = 0;
         for (i = 2; i < params.length; i += 2) {
+            System.out.println("params 1 : " + params[i]);
+            System.out.println("params 1 : " + params[i+1]);
             parameters.concat(params[i] + "=" + params[i + 1]);
             if (i != params.length - 1) {
                 parameters.concat("&");
             }
         }
 
-        System.out.println("doInBackground parameter : " + parameters.toString());
+        System.out.println("doInBackground parameter : " + parameters);
 
         try {
             URL url = new URL(serverURL);
