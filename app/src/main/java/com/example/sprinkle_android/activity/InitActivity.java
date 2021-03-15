@@ -33,10 +33,12 @@ import com.example.sprinkle_android.connection.SprinkleHttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class InitActivity extends AppCompatActivity {
 
-    private List<String> data = new ArrayList<String>();
+    private List<String> phoneBooks = new ArrayList<String>();
     private String androidId = null;
     private String phoneNumber = null;
     private boolean resCheck = false;
@@ -61,7 +63,7 @@ public class InitActivity extends AppCompatActivity {
 //        if(!initStatus.equals("true"))
 //        {
 //            //init 메소드 실행.
-//            initUserInfo();
+            initUserInfo();
 //
 //            // initUserInfo() 메소드가 성공적으로 수행되면 initStatus를 true로 변경.
 //
@@ -88,13 +90,12 @@ public class InitActivity extends AppCompatActivity {
     private void initUserInfo()
     {
         try {
-
-            // 예를들어 로그인관련 POST 요청을한다.
+            // POST 요청을한다.
             SprinkleHttpURLConnection conn = new SprinkleHttpURLConnection(this);
 
             // R.string.url_1은 https://www.naver.com과 같은 특정사이트다.
             // sID -> key, id -> value, sPWD -> key, password -> value
-            conn.execute(this.url, "POST");
+            conn.execute(this.url, "POST", "deviceId", this.androidId, "phoneNum", this.phoneNumber, "phonebooks", this.phoneBooks.toString());
 
             // 동기로 진행된다. task가 성공하면 값을 return 받는다.
             // 만약 error가 발생하면 callBackValue에 Error : 가 포함된다.
@@ -183,8 +184,8 @@ public class InitActivity extends AppCompatActivity {
                 {
                     // 권한 모두 허가
                     resCheck = true;
-                    //getDeviceInfo();
-                    //getAddressBook();
+                    getDeviceInfo();
+                    getAddressBook();
                     getUserInfo();
                     setResult(RESULT_OK,resIntent);
                 }
@@ -193,15 +194,20 @@ public class InitActivity extends AppCompatActivity {
     }
     public void getAddressBook()
     {
+        String regExp = "^[가-힣]";
+        String name = null;
+        String v_id = null;
+
         ContentResolver resolver = getApplication().getContentResolver();
         Uri phoneUri = ContactsContract.Contacts.CONTENT_URI;
         Cursor cursor = resolver.query(phoneUri,Code.ADDRESS_PROJECTION, null,null, null);
 
         while (cursor.moveToNext()){
             try {
-                String v_id = cursor.getString(0);
-                //String v_display_name = cursor.getString(1);
-                data.add(cursor.getString(1));
+                v_id = cursor.getString(0);
+                name = cursor.getString(1);
+                phoneBooks.add(name);
+                System.out.println(name);
             }catch(Exception e) {
                 System.out.println(e.toString());
             }
@@ -211,8 +217,9 @@ public class InitActivity extends AppCompatActivity {
     @SuppressLint({"HardwareIds","ServiceCast"})
     public void getDeviceInfo()
     {
+        // ANDROID_ID는 기기에서 초기화를 수행하거나 APK 서명 키가 변경되면 값이 변경 될 수 있습니다. 우리는 개인별로 훈련 모델이 있기 때문에 아얘 값이 바뀌지 않는 고유값이 필요하다. 일단 이걸로하고 나중에 ㄱㄱ
         this.androidId = Settings.Secure.getString(this.getContentResolver(),Settings.Secure.ANDROID_ID);
-
+        System.out.println("androidId :" + this.androidId);
         TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED
@@ -230,6 +237,7 @@ public class InitActivity extends AppCompatActivity {
 
         try {
             this.phoneNumber = tm.getLine1Number();
+            System.out.println("getDevice() : " + this.phoneNumber);
         }
         catch (NullPointerException e)
         {
