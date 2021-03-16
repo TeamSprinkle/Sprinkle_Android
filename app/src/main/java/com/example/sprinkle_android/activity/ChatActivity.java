@@ -25,6 +25,9 @@ import com.example.sprinkle_android.adapter.DataItem;
 import com.example.sprinkle_android.adapter.MyAdapter;
 import com.example.sprinkle_android.connection.SprinkleHttpURLConnection;
 import com.example.sprinkle_android.recognition.SpeakerRecognizer;
+import com.example.sprinkle_android.scenarios.Call;
+import com.example.sprinkle_android.scenarios.Scenario;
+import com.example.sprinkle_android.scenarios.Schedule;
 
 import org.json.JSONObject;
 
@@ -48,7 +51,7 @@ public class ChatActivity extends AppCompatActivity{
     private boolean ttsInitRes;
     private static final String url = "/command/and_cmd";
     private String serviceName = null;  // isServiceRunning 메소드에 들어가는 파라미터 값
-
+    private ArrayList<Scenario> scenarios;
 
 
 
@@ -56,6 +59,9 @@ public class ChatActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        this.scenarios.add(new Call());
+        this.scenarios.add(new Schedule());
 
         sleep(1000);
         this.initializeData();
@@ -222,7 +228,14 @@ public class ChatActivity extends AppCompatActivity{
 
                 if(res.get("state").equals("SUCCESS"))
                 {
-
+                    for(Scenario scenario : this.scenarios)
+                    {
+                        if(scenario.getIntent().equals(res.get("intent")))
+                        {
+//                            실제 기능 수행 하는 부분
+                            scenario.runScenario();
+                        }
+                    }
                 }
             }
         } catch (ExecutionException e) {

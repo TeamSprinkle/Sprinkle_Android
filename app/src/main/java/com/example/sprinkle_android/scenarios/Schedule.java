@@ -13,4 +13,9 @@ public class Schedule extends Scenario{
     {
         return this.intent;
     }
+
+    public void runScenario(String data)
+    {
+        ;
+    }
 }

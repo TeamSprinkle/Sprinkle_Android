@@ -14,6 +14,11 @@ public class Call extends Scenario{
         return this.intent;
     }
 
+    public void runScenario(String data)
+    {
+        ;
+    }
+
 
 
 
