@@ -1,24 +1,33 @@
 package com.example.sprinkle_android.activity;
 
 import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
+import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceScreen;
 
 import com.example.sprinkle_android.R;
+
+import java.util.Set;
 
 import static android.app.Activity.RESULT_OK;
 import static android.app.Activity.RESULT_CANCELED;
 
-public class SettingsFragment extends PreferenceFragmentCompat {
+public class SettingsFragment extends PreferenceFragmentCompat{
 
     private SharedPreferences pref;
     private EditTextPreference nickName_EPref;
@@ -29,7 +38,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     private String userEmail = null;
     private String emailType = null;
-
+    private static final String test = "setting_ep_nickName";
     private final int USERINFO_REQUEST_CODE = 0;
 
     @Override
@@ -41,9 +50,41 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         //<PregerenceScreen>클래스를 통해 화면 설계 시작..
         //addPreferencesFromResource(R.xml.setting);
 
+        init();
+    }
+
+    //setting_ep_nickName
+    public void init()
+    {
         //SharedPreference객체를 참조하여 설정상태에 대한 제어 가능..
         pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        System.out.println(pref.getString("setting_ep_nickName","시리야"));
+        //설정값 변경리스너..등록
+        pref.registerOnSharedPreferenceChangeListener(listener);
     }
+
+    //설정값 변경리스너 객체 맴버변수
+    SharedPreferences.OnSharedPreferenceChangeListener listener= new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            System.out.println("설정 화면 버튼 이벤트 : " + key);
+            if(key.equals("message"))
+            {
+            }
+            else if(key.equals("vibrate"))
+            {
+            }
+            else if(key.equals("setting_ep_nickName"))
+            {
+                System.out.println("비서 이름 설정");
+            }
+            else if(key.equals("favor"))
+            {
+            }
+        }
+    };
+
+
 
 
     /* 사용자 계정정보 얻어오기

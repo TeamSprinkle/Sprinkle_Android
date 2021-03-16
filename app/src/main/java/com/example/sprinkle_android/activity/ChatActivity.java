@@ -60,8 +60,8 @@ public class ChatActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        this.scenarios.add(new Call());
-        this.scenarios.add(new Schedule());
+        //this.scenarios.add(new Call());
+        //this.scenarios.add(new Schedule());
 
         sleep(1000);
         this.initializeData();
@@ -233,7 +233,7 @@ public class ChatActivity extends AppCompatActivity{
                         if(scenario.getIntent().equals(res.get("intent")))
                         {
 //                            실제 기능 수행 하는 부분
-                            scenario.runScenario();
+                           // scenario.runScenario();
                         }
                     }
                 }
@@ -319,14 +319,17 @@ public class ChatActivity extends AppCompatActivity{
             {
                 commandData = matches.get(i);
             }
-            requestCommand(commandData);
-            userText(commandData);
             System.out.println(commandData);
             // 설정 테스트
             if(commandData.equals("설정"))
             {
                 Intent settingIntent = new Intent(ChatActivity.this,SettingActivity.class);
                 startActivity(settingIntent);
+            }
+            else
+            {
+                requestCommand(commandData);
+                userText(commandData);
             }
         }
 
@@ -355,6 +358,7 @@ public class ChatActivity extends AppCompatActivity{
 
         }
         Log.d("ChatActivity",serviceName + "실행중이지 않음");
+        startService(new Intent(ChatActivity.this, SpeakerRecognizer.class));
         return  false;
 
     }

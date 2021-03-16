@@ -1,6 +1,7 @@
 package com.example.sprinkle_android.recognition;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -24,6 +25,7 @@ import com.example.sprinkle_android.activity.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
@@ -47,7 +49,7 @@ public class SpeakerRecognizer extends RecognitionService {
     private SpeechRecognizer mSrRecognizer;
     private boolean mBoolVoiceRecognitionStarted;
     protected AudioManager mAudioManager;
-    private Intent itIntent;//음성인식 Intent
+    private Intent sttIntent;//음성인식 Intent
     private boolean end = false;
     private String resInputVoice = null;
     private String secretaryName = "시리야";
@@ -66,12 +68,9 @@ public class SpeakerRecognizer extends RecognitionService {
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         if (SpeechRecognizer.isRecognitionAvailable(getApplicationContext())) { //시스템에서 음성인식 서비스 실행이 가능하다면
-            itIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            itIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
-            itIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN.toString());
-            itIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1500);
-            itIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500);
-            itIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+            sttIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            sttIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+            sttIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN.toString());
         }
     }
 
@@ -84,7 +83,7 @@ public class SpeakerRecognizer extends RecognitionService {
             switch (msg.what) {
                 case MSG_VOICE_RECO_READY:
                     Log.d("MSG_VOICE_RECO_READY : ","READY");
-                    startListening();
+                    sendEmptyMessageDelayed(MSG_VOICE_RECO_RESTART, 1000);
                     break;
                 case MSG_VOICE_RECO_END: {
                     Log.d("MSG_VOICE_RECO_END : ","END");
@@ -101,7 +100,6 @@ public class SpeakerRecognizer extends RecognitionService {
                     super.handleMessage(msg);
                     break;
             }
-
         }
     };
 
@@ -163,14 +161,13 @@ public class SpeakerRecognizer extends RecognitionService {
                     mSrRecognizer.setRecognitionListener(mClsRecognitionListener);
                 }
                 Log.d("확인","여기 오니?");
-                mSrRecognizer.startListening(itIntent);
+                mSrRecognizer.startListening(sttIntent);
             }
             mBoolVoiceRecognitionStarted = true;  //음성인식 서비스 실행 중
         }
         // 이 코드는 음성인식이 성공적으로 입력이 됬을 때 음성인식을 다시 시작하는 코드이다.
         // 스노우 보이가 되면 이 코드는 필요 없다.
-        initSTT();
-        mSrRecognizer.startListening(itIntent);
+        mSrRecognizer.startListening(sttIntent);
     }
 
     public void stopListening() //Override 함수가 아닌 한번만 호출되는 함수 음성인식이 중단될 때
@@ -205,7 +202,8 @@ public class SpeakerRecognizer extends RecognitionService {
             // db이 증가하거나 낮아질때 호출 됨
             System.out.println("onRmsChanged()함수 호출/ 순서 : 6");
         }
-
+        // Intent Flag 정리 관련 글 https://kylblog.tistory.com/21
+        // 아래 플래그 값을 써야 ChatActivity 아래에 MainActivity 가 깔리는걸 방지할 수 있다.
         @Override
         public void onResults(Bundle results) {
             System.out.println("onResults()함수 호출/ 순서 : 12");
@@ -219,18 +217,16 @@ public class SpeakerRecognizer extends RecognitionService {
             resInputVoice = strTokenizer.nextToken();
             Log.d("resInputVoice" , resInputVoice);
             if(resInputVoice.equals(secretaryName)) {
-                Log.d("여기 오니? " , "오는데??");
-                Log.d("여기 오니? " , getApplicationContext() + "");
-                Intent chatIntent = new Intent(getApplicationContext(),ChatActivity.class);
-
-                // Intent Flag 정리 관련 글 https://kylblog.tistory.com/21
-                // 아래 플래그 값을 써야 ChatActivity 아래에 MainActivity 가 깔리는걸 방지할 수 있다.
+                Log.d("여기 오니? " ,"com.example.sprinkle_android.recognition.SpeakerRecognizer");
+                isServiceRunning("com.example.sprinkle_android.recognition.SpeakerRecognizer");
+                Intent chatIntent = new Intent(getApplication(),ChatActivity.class);
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
                 chatIntent.putExtra("input_userVoice",resInputVoice);
                 chatIntent.putExtra("input_secretaryVoice","네");
-                startActivity(chatIntent);
+                getApplication().startActivity(chatIntent);
                 Log.d("여기 오니? " , "오는데??2");
+                stopSelf();
             }
             else {
                 startListening();
@@ -312,4 +308,22 @@ public class SpeakerRecognizer extends RecognitionService {
             System.out.println("onPartialResults()함수 호출/ 순서 : 17");
         }
     };
+    public Boolean isServiceRunning(String serviceName){
+
+        // 시스템 내부의 액티비티 상태를 파악하는 ActivityManager객체를 생성한다.
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        //  manager.getRunningServices(가져올 서비스 목록 개수) - 현재 시스템에서 동작 중인 모든 서비스 목록을 얻을 수 있다.
+        // 리턴값은 List<ActivityManager.RunningServiceInfo>이다. (ActivityManager.RunningServiceInfo의 객체를 담은 List)
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+
+            // ActivityManager.RunningServiceInfo의 객체를 통해 현재 실행중인 서비스의 정보를 가져올 수 있다.
+            if (serviceName.equals(service.service.getClassName())) {
+                Log.d("SpeakerRecognizer",service.service.getClassName() + "실행중");
+                return true;
+            }
+
+        }
+        Log.d("SpeakerRecognizer",serviceName + "실행중이지 않음");
+        return  false;
+    }
 }
