@@ -45,47 +45,18 @@ public class InitActivity extends AppCompatActivity {
     private String userEmail = null;
     private String emailType = null;
     private final int USERINFO_REQUEST_CODE = 0;
-    private boolean test = false;
     private static final String url = "/users/init";
+    private SharedPreferences sf = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init);
 
-        //저장된 값을 불러오기 위해 같은 네임파일을 찾음.
-        //SharedPreferences sf = getSharedPreferences("statusFile",MODE_PRIVATE);
+
 
         checkPermission();
 
-        //initStatus라는 key에 저장된 값이 있는지 확인. 아무값도 들어있지 않으면 ""를 반환
-//        String initStatus = sf.getString("initStatus","");
-//        if(!initStatus.equals("true"))
-//        {
-//            //init 메소드 실행.
-//fff            initUserInfo();
-//
-//            // initUserInfo() 메소드가 성공적으로 수행되면 initStatus를 true로 변경.
-//
-////            // Activity가 종료되기 전에 저장한다.
-////            //SharedPreferences를 sFile이름, 기본모드로 설정
-////            SharedPreferences sharedPreferences = getSharedPreferences("sFile",MODE_PRIVATE);
-////
-////            //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
-////            SharedPreferences.Editor editor = sharedPreferences.edit();
-////            String text = editText.getText().toString(); // 사용자가 입력한 저장할 데이터
-////            editor.putString("text",text); // key, value를 이용하여 저장하는 형태
-////            //다양한 형태의 변수값을 저장할 수 있다.
-////            //editor.putString();
-////            //editor.putBoolean();
-////            //editor.putFloat();
-////            //editor.putLong();
-////            //editor.putInt();
-////            //editor.putStringSet();
-////
-////            //최종 커밋
-////            editor.commit();
-//        }
     }
 
 
@@ -192,7 +163,38 @@ public class InitActivity extends AppCompatActivity {
                     getDeviceInfo();
                     getAddressBook();
                     getUserInfo();
-                    initUserInfo();
+
+                    //저장된 값을 불러오기 위해 같은 네임파일을 찾음.
+                    this.sf = getSharedPreferences("statusFile",MODE_PRIVATE);
+                    //initStatus라는 key에 저장된 값이 있는지 확인. 아무값도 들어있지 않으면 ""를 반환
+                    String initStatus = sf.getString("initStatus","");
+                    if(!initStatus.equals("true"))
+                    {
+//                        //init 메소드 실행.
+//                        initUserInfo();
+//
+////                      initUserInfo() 메소드가 성공적으로 수행되면 initStatus를 true로 변경.
+//
+//                        // Activity가 종료되기 전에 저장한다.
+//                        //SharedPreferences를 sFile이름, 기본모드로 설정
+//                        SharedPreferences sharedPreferences = getSharedPreferences("sFile",MODE_PRIVATE);
+//
+//                        //저장을 하기위해 editor를 이용하여 값을 저장시켜준다.
+//                        SharedPreferences.Editor editor = sharedPreferences.edit();
+//                        String text = editText.getText().toString(); // 사용자가 입력한 저장할 데이터
+//                        editor.putString("text",text); // key, value를 이용하여 저장하는 형태
+//                        //다양한 형태의 변수값을 저장할 수 있다.
+//                        //editor.putString();
+//                        //editor.putBoolean();
+//                        //editor.putFloat();
+//                        //editor.putLong();
+//                        //editor.putInt();
+//                        //editor.putStringSet();
+
+                        //최종 커밋
+//                        editor.commit();
+                    }
+
                     setResult(RESULT_OK,resIntent);
                 }
                 finish();

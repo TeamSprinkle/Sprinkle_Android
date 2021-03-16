@@ -41,7 +41,7 @@ public class SprinkleHttpURLConnection extends AsyncTask<String, Void, String> {
         String action = params[1]; // GET , POST 방식의 action 정보
         JSONObject parameters = new JSONObject(); // 전달인자로 보내는 정보
         String result = null;
-        
+
         try {
             int i = 0;
             for (i = 2; i < params.length; i += 2) {
