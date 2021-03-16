@@ -56,8 +56,13 @@ public class SpeakerRecognizer extends RecognitionService {
     public void onCreate() {
         super.onCreate();
         System.out.println("onCreate()함수 호출/ 순서 : 1");
+        initSTT();
+        startListening();
+    }
+    public void initSTT()
+    {
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        
+
         if (SpeechRecognizer.isRecognitionAvailable(getApplicationContext())) { //시스템에서 음성인식 서비스 실행이 가능하다면
             itIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             itIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
@@ -65,27 +70,32 @@ public class SpeakerRecognizer extends RecognitionService {
             itIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1500);
             itIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500);
             itIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
-            startListening();
         }
     }
 
     @SuppressLint("HandlerLeak")
-    private final Handler mHdrVoiceRecognitionState = new Handler() {
+    public final Handler mHdrVoiceRecognitionState = new Handler() {
+        @SuppressLint("LongLogTag")
         @Override
         public void handleMessage(Message msg) {
             System.out.println("handleMessage()함수 호출/ 순서 : 2");
             switch (msg.what) {
                 case MSG_VOICE_RECO_READY:
+                    Log.d("MSG_VOICE_RECO_READY : ","READY");
+                    startListening();
                     break;
                 case MSG_VOICE_RECO_END: {
+                    Log.d("MSG_VOICE_RECO_END : ","END");
                     stopListening();
                     sendEmptyMessageDelayed(MSG_VOICE_RECO_RESTART, 1000);
                     break;
                 }
                 case MSG_VOICE_RECO_RESTART:
+                    Log.d("MSG_VOICE_RECO_RESTART : ","RESTART");
                     startListening();
                     break;
                 default:
+                    Log.d("default : ","default");
                     super.handleMessage(msg);
                     break;
             }
@@ -156,6 +166,7 @@ public class SpeakerRecognizer extends RecognitionService {
         }
         // 이 코드는 음성인식이 성공적으로 입력이 됬을 때 음성인식을 다시 시작하는 코드이다.
         // 스노우 보이가 되면 이 코드는 필요 없다.
+        initSTT();
         mSrRecognizer.startListening(itIntent);
     }
 
@@ -203,7 +214,9 @@ public class SpeakerRecognizer extends RecognitionService {
             mResult.toArray(rs);
             StringTokenizer strTokenizer = new StringTokenizer(Arrays.toString(rs),"[]");
             resInputVoice = strTokenizer.nextToken();
+            Log.d("resInputVoice : " , resInputVoice);
             if(resInputVoice.equals(secretaryName)) {
+                Log.d("여기 오니? " , "오는데??");
                 Intent chatIntent = new Intent(getApplicationContext(),ChatActivity.class);
                 // Intent Flag 정리 관련 글 https://kylblog.tistory.com/21
                 // 아래 플래그 값을 써야 ChatActivity 아래에 MainActivity 가 깔리는걸 방지할 수 있다.
@@ -212,6 +225,7 @@ public class SpeakerRecognizer extends RecognitionService {
                 chatIntent.putExtra("input_userVoice",resInputVoice);
                 chatIntent.putExtra("input_secretaryVoice","네");
                 startActivity(chatIntent);
+                Log.d("여기 오니? " , "오는데??2");
             }
             else {
                 startListening();

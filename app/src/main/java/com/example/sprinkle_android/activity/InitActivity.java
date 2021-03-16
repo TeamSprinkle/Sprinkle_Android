@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
@@ -20,8 +19,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -33,8 +30,6 @@ import com.example.sprinkle_android.connection.SprinkleHttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class InitActivity extends AppCompatActivity {
 
@@ -47,16 +42,14 @@ public class InitActivity extends AppCompatActivity {
     private final int USERINFO_REQUEST_CODE = 0;
     private static final String url = "/users/init";
     private SharedPreferences sf = null;
+    private SharedPreferences.Editor editor = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init);
 
-
-
         checkPermission();
-
     }
 
 
@@ -90,10 +83,8 @@ public class InitActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
             Log.d("MainActivity", "InterruptedException");
-
         }
     }
-
 
     private void checkPermission()
     {
@@ -164,8 +155,11 @@ public class InitActivity extends AppCompatActivity {
                     getAddressBook();
                     getUserInfo();
 
-                    //저장된 값을 불러오기 위해 같은 네임파일을 찾음.
+                    // SharedPreferences 초기화
                     this.sf = getSharedPreferences("statusFile",MODE_PRIVATE);
+                    this.editor = sf.edit();
+                    
+                    //저장된 값을 불러오기 위해 같은 네임파일을 찾음.
                     //initStatus라는 key에 저장된 값이 있는지 확인. 아무값도 들어있지 않으면 ""를 반환
                     String initStatus = sf.getString("initStatus","");
                     if(!initStatus.equals("true"))

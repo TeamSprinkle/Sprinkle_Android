@@ -1,5 +1,6 @@
 package com.example.sprinkle_android.activity;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -23,6 +24,7 @@ import com.example.sprinkle_android.adapter.Code;
 import com.example.sprinkle_android.adapter.DataItem;
 import com.example.sprinkle_android.adapter.MyAdapter;
 import com.example.sprinkle_android.connection.SprinkleHttpURLConnection;
+import com.example.sprinkle_android.recognition.SpeakerRecognizer;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -43,6 +45,7 @@ public class ChatActivity extends AppCompatActivity{
     private TextToSpeech tts;
     private boolean ttsInitRes;
     private static final String url = "/command/and_cmd";
+    private String serviceName = null;  // isServiceRunning 메소드에 들어가는 파라미터 값
 
 
 
@@ -52,13 +55,13 @@ public class ChatActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        this.initializeData();
         sleep(1000);
+        this.initializeData();
         // 여기에 기능 수행하는 STT를 실행시키는 코드를 넣으면 된다...
         userText(receiveDataIntent.getStringExtra("input_userVoice")); // 사용자가 하는 말을 텍스트화 시켜서 리스트에 추가
         System.out.println(receiveDataIntent.getStringExtra("input_secretaryVoice"));
         secretaryText(receiveDataIntent.getStringExtra("input_secretaryVoice"));
-        //startListening();
+        startListening();
     }
 
     public void initializeData()
@@ -72,7 +75,7 @@ public class ChatActivity extends AppCompatActivity{
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 마시맬로우 버전 이상인 경우
-            if (mAudioManager.isStreamMute(AudioManager.STREAM_NOTIFICATION)) { // 디바이스가 음소거인 경우
+            if (mAudioManager.isStreamMute(AudioManager.STREAM_NOTIFICATION)) { // 알람이 음소거인 경우
                 System.out.println("알림 음소거 해제");
                 mAudioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_UNMUTE, 0); // 알림 언뮤트
                 mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_UNMUTE, 0); // 미디어 언뮤트
@@ -167,6 +170,7 @@ public class ChatActivity extends AppCompatActivity{
                 return true;
             case (MotionEvent.ACTION_UP) :
                 Log.d("이벤트 확인","Action was UP");
+                isServiceRunning(SpeakerRecognizer.class.getName()); // 비서인식 서비스 상태 확인
                 finish();
                 return true;
             case (MotionEvent.ACTION_CANCEL) :
@@ -188,6 +192,7 @@ public class ChatActivity extends AppCompatActivity{
         mRecognizer.startListening(speechRecognitionIntent);
     }
 
+    // 스레드 돌려야함
     private void requestCommand(String command)
     {
         try {
@@ -292,9 +297,9 @@ public class ChatActivity extends AppCompatActivity{
             {
                 commandData = matches.get(i);
             }
+            requestCommand(commandData);
             userText(commandData);
             System.out.println(commandData);
-
             // 설정 테스트
             if(commandData.equals("설정"))
             {
@@ -311,5 +316,25 @@ public class ChatActivity extends AppCompatActivity{
         @Override
         public void onEvent(int eventType, Bundle params) {}
     };
+
+    public Boolean isServiceRunning(String serviceName){
+
+        // 시스템 내부의 액티비티 상태를 파악하는 ActivityManager객체를 생성한다.
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        //  manager.getRunningServices(가져올 서비스 목록 개수) - 현재 시스템에서 동작 중인 모든 서비스 목록을 얻을 수 있다.
+        // 리턴값은 List<ActivityManager.RunningServiceInfo>이다. (ActivityManager.RunningServiceInfo의 객체를 담은 List)
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+
+            // ActivityManager.RunningServiceInfo의 객체를 통해 현재 실행중인 서비스의 정보를 가져올 수 있다.
+            if (serviceName.equals(service.service.getClassName())) {
+                Log.d("ChatActivity",service.service.getClassName() + "실행중");
+                return true;
+            }
+
+        }
+        Log.d("ChatActivity",serviceName + "실행중이지 않음");
+        return  false;
+
+    }
 
 }
