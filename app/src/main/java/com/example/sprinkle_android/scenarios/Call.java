@@ -1,7 +1,20 @@
 package com.example.sprinkle_android.scenarios;
 
-public class Call {
+public class Call extends Scenario{
 
-    private String name;
+    private String intent;
+
+    public Call()
+    {
+        this.intent = "call";
+    }
+
+    public String getIntent()
+    {
+        return this.intent;
+    }
+
+
+
 
 }

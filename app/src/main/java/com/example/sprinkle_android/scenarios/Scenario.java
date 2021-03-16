@@ -1,4 +1,8 @@
 package com.example.sprinkle_android.scenarios;
 
-public class Scenario {
+public abstract class Scenario {
+    private String intent;
+
+    public abstract String getIntent();
+
 }

@@ -26,6 +26,8 @@ import com.example.sprinkle_android.adapter.MyAdapter;
 import com.example.sprinkle_android.connection.SprinkleHttpURLConnection;
 import com.example.sprinkle_android.recognition.SpeakerRecognizer;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -216,6 +218,12 @@ public class ChatActivity extends AppCompatActivity{
             else {
                 Log.d("ChatActivity 성공 결과값", callBackValue);
                 // TODO : callBackValue를 이용해서 코드기술
+                JSONObject res = new JSONObject(callBackValue);
+
+                if(res.get("state").equals("SUCCESS"))
+                {
+
+                }
             }
         } catch (ExecutionException e) {
             e.printStackTrace();
@@ -223,7 +231,8 @@ public class ChatActivity extends AppCompatActivity{
         } catch (InterruptedException e) {
             e.printStackTrace();
             Log.d("ChatActivity", "InterruptedException");
-
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 
