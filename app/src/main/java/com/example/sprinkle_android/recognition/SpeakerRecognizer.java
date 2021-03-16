@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import static android.os.SystemClock.sleep;
 import static android.speech.SpeechRecognizer.ERROR_AUDIO;
 import static android.speech.SpeechRecognizer.ERROR_CLIENT;
 import static android.speech.SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS;
@@ -58,6 +59,7 @@ public class SpeakerRecognizer extends RecognitionService {
         System.out.println("onCreate()함수 호출/ 순서 : 1");
         initSTT();
         startListening();
+
     }
     public void initSTT()
     {
@@ -121,7 +123,7 @@ public class SpeakerRecognizer extends RecognitionService {
         // 아래 코드가 있으면 일단 오류... 근데 이 함수가 호출되면 알림바?에 표시됨.. 원래라면 서비스 호출후 5초이내에 이 메소드가 호출되지 않으면 종료된다고 하는데...왜 종료되지 않는 걸까?
         //startForeground(1, notification);
 
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
 
@@ -131,7 +133,7 @@ public class SpeakerRecognizer extends RecognitionService {
         System.out.println("onDestroy()함수 호출/ 순서 : 10");
         end = true;
         mSrRecognizer.destroy();
-        mHdrVoiceRecognitionState.sendEmptyMessage(MSG_VOICE_RECO_READY); //음성인식 서비스 다시 시작
+        //mHdrVoiceRecognitionState.sendEmptyMessage(MSG_VOICE_RECO_READY); //음성인식 서비스 다시 시작
     }
 
     @Override
@@ -160,6 +162,7 @@ public class SpeakerRecognizer extends RecognitionService {
                     mSrRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
                     mSrRecognizer.setRecognitionListener(mClsRecognitionListener);
                 }
+                Log.d("확인","여기 오니?");
                 mSrRecognizer.startListening(itIntent);
             }
             mBoolVoiceRecognitionStarted = true;  //음성인식 서비스 실행 중
@@ -210,14 +213,16 @@ public class SpeakerRecognizer extends RecognitionService {
             String key = "";
             key = SpeechRecognizer.RESULTS_RECOGNITION;
             ArrayList<String> mResult = results.getStringArrayList(key);
-            final String[] rs = new String[mResult.size()];
+            String[] rs = new String[mResult.size()];
             mResult.toArray(rs);
             StringTokenizer strTokenizer = new StringTokenizer(Arrays.toString(rs),"[]");
             resInputVoice = strTokenizer.nextToken();
-            Log.d("resInputVoice : " , resInputVoice);
+            Log.d("resInputVoice" , resInputVoice);
             if(resInputVoice.equals(secretaryName)) {
                 Log.d("여기 오니? " , "오는데??");
+                Log.d("여기 오니? " , getApplicationContext() + "");
                 Intent chatIntent = new Intent(getApplicationContext(),ChatActivity.class);
+
                 // Intent Flag 정리 관련 글 https://kylblog.tistory.com/21
                 // 아래 플래그 값을 써야 ChatActivity 아래에 MainActivity 가 깔리는걸 방지할 수 있다.
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -210,11 +210,11 @@ public class ChatActivity extends AppCompatActivity{
 
             // fail
             if(callBackValue.isEmpty() || callBackValue.equals("") || callBackValue == null || callBackValue.contains("Error")) {
-                Log.d("ChatActivity 결과값", "서버 요청 실패다");
+                Log.d("ChatActivity 실패 결과값", "서버 요청 실패다");
             }
             // success
             else {
-                Log.d("ChatActivity 결과값", callBackValue);
+                Log.d("ChatActivity 성공 결과값", callBackValue);
                 // TODO : callBackValue를 이용해서 코드기술
             }
         } catch (ExecutionException e) {
