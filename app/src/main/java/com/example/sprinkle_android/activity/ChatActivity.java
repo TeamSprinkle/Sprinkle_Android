@@ -42,7 +42,7 @@ public class ChatActivity extends AppCompatActivity{
     private MyAdapter myAdapter;
     private TextToSpeech tts;
     private boolean ttsInitRes;
-    private static final String url = "/command/test";
+    private static final String url = "/command/and_cmd";
 
 
 
