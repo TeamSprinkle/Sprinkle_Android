@@ -22,9 +22,11 @@ import com.example.sprinkle_android.R;
 import com.example.sprinkle_android.adapter.Code;
 import com.example.sprinkle_android.adapter.DataItem;
 import com.example.sprinkle_android.adapter.MyAdapter;
+import com.example.sprinkle_android.connection.SprinkleHttpURLConnection;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import static android.os.SystemClock.sleep;
 
@@ -40,6 +42,7 @@ public class ChatActivity extends AppCompatActivity{
     private MyAdapter myAdapter;
     private TextToSpeech tts;
     private boolean ttsInitRes;
+    private static final String url = "/command/test";
 
 
 
@@ -185,6 +188,40 @@ public class ChatActivity extends AppCompatActivity{
         mRecognizer.startListening(speechRecognitionIntent);
     }
 
+    private void requestCommand(String command)
+    {
+        try {
+            // POST 요청을한다.
+            SprinkleHttpURLConnection conn = new SprinkleHttpURLConnection(this);
+
+            // R.string.url_1은 https://www.naver.com과 같은 특정사이트다.
+            // sID -> key, id -> value, sPWD -> key, password -> value
+            conn.execute(this.url, "POST", "command", command);
+
+            // 동기로 진행된다. task가 성공하면 값을 return 받는다.
+            // 만약 error가 발생하면 callBackValue에 Error : 가 포함된다.
+            // return을 받을생각이 없다면 해당 코드줄은 주석처리해도된다. 단 작업의 성공여부는 알수없음
+            String callBackValue = conn.get();
+
+            // fail
+            if(callBackValue.isEmpty() || callBackValue.equals("") || callBackValue == null || callBackValue.contains("Error")) {
+                Log.d("ChatActivity 결과값", "서버 요청 실패다");
+            }
+            // success
+            else {
+                Log.d("ChatActivity 결과값", callBackValue);
+                // TODO : callBackValue를 이용해서 코드기술
+            }
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            Log.d("ChatActivity", "ExecutionException");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            Log.d("ChatActivity", "InterruptedException");
+
+        }
+    }
+
     // RecognizerIntent 객체에 할당할 listener 생성 test
     private RecognitionListener listener = new RecognitionListener()
     {
@@ -265,6 +302,8 @@ public class ChatActivity extends AppCompatActivity{
                 startActivity(settingIntent);
             }
         }
+
+
 
         @Override
         public void onPartialResults(Bundle partialResults) {}
