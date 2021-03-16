@@ -60,8 +60,8 @@ public class ChatActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        //this.scenarios.add(new Call());
-        //this.scenarios.add(new Schedule());
+        this.scenarios.add(new Call());
+        this.scenarios.add(new Schedule());
 
         sleep(1000);
         this.initializeData();
@@ -225,18 +225,34 @@ public class ChatActivity extends AppCompatActivity{
                 Log.d("ChatActivity 성공 결과값", callBackValue);
                 // TODO : callBackValue를 이용해서 코드기술
                 JSONObject res = new JSONObject(callBackValue);
+                String state = (String) res.get("state");
 
-                if(res.get("state").equals("SUCCESS"))
+                if(state.equals("SUCCESS"))
                 {
                     for(Scenario scenario : this.scenarios)
                     {
                         if(scenario.getIntent().equals(res.get("intent")))
                         {
-//                            실제 기능 수행 하는 부분
-                           // scenario.runScenario();
+                            String answer = (String) res.get("answer");
+                            scenario.runScenario(this, answer);
                         }
                     }
                 }
+//                else if(state.equals("FALLBACK"))
+//                {
+//
+//                }
+                else
+                {
+                    // FALLBACK 상황인 경우에
+                    // TTS에 다시 한번 말씀해 주세요 라고 말해
+                    // 다시 받으면 서버에 요청
+
+                    // require 정보가 있는 경우
+                    // 각 scenario에서 require 관련 처리해서 TTS에 말하고
+                    // 필요한 정보 받아와서 runScenario 실행
+                }
+
             }
         } catch (ExecutionException e) {
             e.printStackTrace();
@@ -319,6 +335,8 @@ public class ChatActivity extends AppCompatActivity{
             {
                 commandData = matches.get(i);
             }
+            requestCommand(commandData);
+            userText(commandData);
             System.out.println(commandData);
             // 설정 테스트
             if(commandData.equals("설정"))
@@ -358,7 +376,6 @@ public class ChatActivity extends AppCompatActivity{
 
         }
         Log.d("ChatActivity",serviceName + "실행중이지 않음");
-        startService(new Intent(ChatActivity.this, SpeakerRecognizer.class));
         return  false;
 
     }
