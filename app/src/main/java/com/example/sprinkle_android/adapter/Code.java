@@ -54,7 +54,8 @@ public class Code {
 
     public static final String[] ADDRESS_PROJECTION = new String[]{
             ContactsContract.Contacts._ID,
-            ContactsContract.Contacts.DISPLAY_NAME
+            ContactsContract.Contacts.DISPLAY_NAME,
+            ContactsContract.Contacts.HAS_PHONE_NUMBER // 이거 아님
     };
 }
 

@@ -48,28 +48,27 @@ public class Call extends Scenario{
             Log.d("Call",target);
             
             // 전화걸기
-            if(getAddressBook(context,target)) {
-                context.startActivity(new Intent("android.intent.action.CALL", Uri.parse(phoneNumber)));
-                return "성공";
+            if(getAddressBook(context,"이경원") == -1)
+            {
+                return "Fail";
+
             }
             else
             {
-                return "실패";
+                context.startActivity(new Intent("android.intent.action.CALL", Uri.parse("tel:" + phoneNumber)));
+                return "Success";
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return "";
     }
-    public boolean getAddressBook(Context context,String target)
+    public int getAddressBook(Context context,String target)
     {
-        List<String> phoneBooks = new ArrayList<String>();
         String regExp = "^[가-힣]";
-        String name = null;
         String v_id = null;
-        Set<String> savePhoneBooks = null;
-        Iterator<String> iter = phoneBooks.iterator();
-
+        String name = null;
+        String phoneNum = null;
 
         ContentResolver resolver = context.getContentResolver();
         Uri phoneUri = ContactsContract.Contacts.CONTENT_URI;
@@ -78,21 +77,17 @@ public class Call extends Scenario{
         while (cursor.moveToNext()){
             try {
                 name = cursor.getString(1);
-                phoneBooks.add(name);
+                phoneNum = cursor.getString(2);
+                if(name.equals(target))
+                {
+                    Log.d("이거 번호 뭐니?",phoneNum);
+                    return Integer.parseInt(phoneNum);
+                }
             }catch(Exception e) {
                 System.out.println(e.toString());
             }
         }
-
-        while(iter.hasNext())
-        {
-            if(iter.next().equals(target))
-            {
-                return true;
-            }
-        }
-        cursor.close();
-        return false;
+        return -1;
     }
     public String getRequireAnswer(String entity)
     {

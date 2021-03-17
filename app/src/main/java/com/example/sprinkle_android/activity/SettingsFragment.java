@@ -52,11 +52,9 @@ public class SettingsFragment extends PreferenceFragmentCompat{
     public void init()
     {
         //SharedPreference객체를 참조하여 설정상태에 대한 제어 가능..
-        //this.pref = getContext().getSharedPreferences("myPref",MODE_PRIVATE);
-        this.pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //this.pref = getContext().getSharedPreferences("myPref",MODE_PRIVATE); // 키값을 가지는 파일에 저장하기 때문에 같은
+        this.pref = PreferenceManager.getDefaultSharedPreferences(getActivity()); // 패키지에 저장
         this.editor = pref.edit();
-
-
 
         // 설정값 preference 키값 등록
         this.nickName_EPref = findPreference("setting_ep_secretary_name");
@@ -64,6 +62,7 @@ public class SettingsFragment extends PreferenceFragmentCompat{
         this.otherSecretaryFired_SPref = findPreference("setting_sp_otherSecretaryFired");
         this.secretarySay_SPref = findPreference("setting_sp_secretarySay");
         this.userSay_SPref = findPreference("setting_sp_userSay");
+
         // 비서이름 초기화
         this.secretaryName = pref.getString("setting_ep_secretary_name","");
         this.nickName_EPref.setSummary(pref.getString("setting_ep_secretary_name",secretaryName));
@@ -81,10 +80,7 @@ public class SettingsFragment extends PreferenceFragmentCompat{
             if(key.equals("setting_ep_secretary_name"))
             {
                 Log.d("settingFragment","비서 이름 설정");
-                nickName_EPref.setSummary(nickName_EPref.getText());
-                editor.putString("setting_ep_secretary_name",nickName_EPref.getText());
-                editor.apply();
-                Log.d("settingFragment","비서 이름 변경 : " + nickName_EPref.getText());
+                exchangeSecretaryName("setting_ep_secretary_name",nickName_EPref.getText());
             }
             else if(key.equals("setting_lp_voiceSelect"))
             {
@@ -101,8 +97,13 @@ public class SettingsFragment extends PreferenceFragmentCompat{
         }
     };
 
-
-
+    public void exchangeSecretaryName(String prefKey,String changeData)
+    {
+        nickName_EPref.setSummary(nickName_EPref.getText());
+        editor.putString("setting_ep_secretary_name",nickName_EPref.getText());
+        editor.apply();
+        Log.d("settingFragment","비서 이름 변경 : " + nickName_EPref.getText());
+    }
 
     /* 사용자 계정정보 얻어오기
         AccountManager를 통해 핸드폰 안의 사용자 계정을 가지고 온다. */

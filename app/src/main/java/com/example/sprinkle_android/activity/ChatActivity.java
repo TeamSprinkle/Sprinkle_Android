@@ -29,6 +29,7 @@ import com.example.sprinkle_android.scenarios.Call;
 import com.example.sprinkle_android.scenarios.Scenario;
 import com.example.sprinkle_android.scenarios.Schedule;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -242,8 +243,9 @@ public class ChatActivity extends AppCompatActivity{
                 {
                     for(Scenario scenario : this.scenarios)
                     {
-                        if(scenario.getIntent().equals(res.get("intent")))
+                        if(scenario.getIntent().equals(res.getJSONObject("answer")))
                         {
+                            //Log.d("확인용","여기 오냐");
                             scenario.runScenario(this, res);
                         }
                     }
@@ -269,6 +271,8 @@ public class ChatActivity extends AppCompatActivity{
         } catch (InterruptedException e) {
             e.printStackTrace();
             Log.d("ChatActivity", "InterruptedException");
+        } catch (JSONException e){
+            Log.d("ChatActivity", "JSONException");
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -332,7 +336,8 @@ public class ChatActivity extends AppCompatActivity{
                     message = "알 수 없는 오류임";
                     break;
             }
-            Toast.makeText(getApplicationContext(), "에러가 발생하였습니다. : " + message,Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "에러가 발생하였습니다. : " + message,Toast.LENGTH_SHORT).show();
+            Log.e("ChatActivity","에러가 발생했습니다 : " + message);
         }
 
         @Override public void onResults(Bundle results)

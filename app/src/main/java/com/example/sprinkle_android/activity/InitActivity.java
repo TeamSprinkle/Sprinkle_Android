@@ -157,6 +157,7 @@ public class InitActivity extends AppCompatActivity {
                     resCheck = true;
                     getDeviceInfo();
                     getAddressBook();
+                    //getAddressBook2();
                     getUserInfo();
 
                     // SharedPreferences 초기화
@@ -225,6 +226,32 @@ public class InitActivity extends AppCompatActivity {
         while(iter.hasNext())
         {
             System.out.println(iter.next());
+        }
+        cursor.close();
+    }
+    public void getAddressBook2()
+    {
+        String regExp = "^[가-힣]";
+        String name = null;
+        String v_id = null;
+        Set<String> savePhoneBooks = null;
+
+        ContentResolver resolver = getApplication().getContentResolver();
+        Uri phoneUri = ContactsContract.Contacts.CONTENT_URI;
+        Cursor cursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null, null,null, null);
+
+        while (cursor.moveToNext()){
+            try {
+                System.out.println("이름 : " + cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                System.out.println("번호 : " + cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            }catch(Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+        Iterator<String> iter = this.phoneBooks.iterator();
+        while(iter.hasNext())
+        {
+            //System.out.println(iter.next());
         }
         cursor.close();
     }
