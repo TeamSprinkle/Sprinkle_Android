@@ -60,9 +60,6 @@ public class ChatActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        this.scenarios.add(new Call());
-        this.scenarios.add(new Schedule());
-
         sleep(1000);
         this.initializeData();
         // 여기에 기능 수행하는 STT를 실행시키는 코드를 넣으면 된다...
@@ -128,6 +125,11 @@ public class ChatActivity extends AppCompatActivity{
                 }
             }
         });
+
+        // 시나리오 초기화
+        this.scenarios = new ArrayList<Scenario>();
+        this.scenarios.add(new Call());
+        this.scenarios.add(new Schedule());
     }
     public void secretaryText(String voiceData)
     {
@@ -178,7 +180,17 @@ public class ChatActivity extends AppCompatActivity{
                 return true;
             case (MotionEvent.ACTION_UP) :
                 Log.d("이벤트 확인","Action was UP");
-                isServiceRunning(SpeakerRecognizer.class.getName()); // 비서인식 서비스 상태 확인
+
+                // 비서인식 서비스 상태 확인
+                // isServiceRunning()의 리턴 값이 해당 서비스가 실행중이면 true 아니라면 false를 리턴
+                if(!isServiceRunning(SpeakerRecognizer.class.getName()))
+                {
+                    startService(new Intent(ChatActivity.this, SpeakerRecognizer.class));
+                }
+                else
+                {
+                    // 서비스가 실행중이라 startService하면 안되려나..?
+                }
                 finish();
                 return true;
             case (MotionEvent.ACTION_CANCEL) :
@@ -200,7 +212,6 @@ public class ChatActivity extends AppCompatActivity{
         mRecognizer.startListening(speechRecognitionIntent);
     }
 
-    // 스레드 돌려야함
     private void requestCommand(String command)
     {
         try {
@@ -233,8 +244,7 @@ public class ChatActivity extends AppCompatActivity{
                     {
                         if(scenario.getIntent().equals(res.get("intent")))
                         {
-                            String answer = (String) res.get("answer");
-                            scenario.runScenario(this, answer);
+                            scenario.runScenario(this, res);
                         }
                     }
                 }
@@ -252,7 +262,6 @@ public class ChatActivity extends AppCompatActivity{
                     // 각 scenario에서 require 관련 처리해서 TTS에 말하고
                     // 필요한 정보 받아와서 runScenario 실행
                 }
-
             }
         } catch (ExecutionException e) {
             e.printStackTrace();
@@ -335,9 +344,6 @@ public class ChatActivity extends AppCompatActivity{
             {
                 commandData = matches.get(i);
             }
-            requestCommand(commandData);
-            userText(commandData);
-            System.out.println(commandData);
             // 설정 테스트
             if(commandData.equals("설정"))
             {
@@ -350,8 +356,6 @@ public class ChatActivity extends AppCompatActivity{
                 userText(commandData);
             }
         }
-
-
 
         @Override
         public void onPartialResults(Bundle partialResults) {}
@@ -373,7 +377,6 @@ public class ChatActivity extends AppCompatActivity{
                 Log.d("ChatActivity",service.service.getClassName() + "실행중");
                 return true;
             }
-
         }
         Log.d("ChatActivity",serviceName + "실행중이지 않음");
         return  false;

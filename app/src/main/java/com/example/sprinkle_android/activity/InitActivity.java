@@ -22,13 +22,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import com.example.sprinkle_android.R;
 import com.example.sprinkle_android.adapter.Code;
 import com.example.sprinkle_android.connection.SprinkleHttpURLConnection;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 public class InitActivity extends AppCompatActivity {
@@ -41,7 +44,7 @@ public class InitActivity extends AppCompatActivity {
     private String emailType = null;
     private final int USERINFO_REQUEST_CODE = 0;
     private static final String url = "/users/init";
-    private SharedPreferences sf = null;
+    private SharedPreferences pref = null;
     private SharedPreferences.Editor editor = null;
 
     @Override
@@ -122,6 +125,7 @@ public class InitActivity extends AppCompatActivity {
     }
 
 
+    @SuppressLint("CommitPrefEdits")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -156,12 +160,15 @@ public class InitActivity extends AppCompatActivity {
                     getUserInfo();
 
                     // SharedPreferences 초기화
-                    this.sf = getSharedPreferences("statusFile",MODE_PRIVATE);
-                    this.editor = sf.edit();
+                    this.pref = PreferenceManager.getDefaultSharedPreferences(this);
+                    this.editor = pref.edit();
+                    // 비서 이름 초기화
+                    this.editor.putString("secretaryName","시리야");
+                    this.editor.apply();
                     
                     //저장된 값을 불러오기 위해 같은 네임파일을 찾음.
                     //initStatus라는 key에 저장된 값이 있는지 확인. 아무값도 들어있지 않으면 ""를 반환
-                    String initStatus = sf.getString("initStatus","");
+                    String initStatus = pref.getString("initStatus","");
                     if(!initStatus.equals("true"))
                     {
 //                        //init 메소드 실행.
@@ -199,6 +206,7 @@ public class InitActivity extends AppCompatActivity {
         String regExp = "^[가-힣]";
         String name = null;
         String v_id = null;
+        Set<String> savePhoneBooks = null;
 
         ContentResolver resolver = getApplication().getContentResolver();
         Uri phoneUri = ContactsContract.Contacts.CONTENT_URI;
@@ -208,11 +216,15 @@ public class InitActivity extends AppCompatActivity {
             try {
                 v_id = cursor.getString(0);
                 name = cursor.getString(1);
-                phoneBooks.add(name);
-                System.out.println(name);
+                this.phoneBooks.add(name);
             }catch(Exception e) {
                 System.out.println(e.toString());
             }
+        }
+        Iterator<String> iter = this.phoneBooks.iterator();
+        while(iter.hasNext())
+        {
+            System.out.println(iter.next());
         }
         cursor.close();
     }

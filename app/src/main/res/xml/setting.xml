@@ -7,12 +7,12 @@
         android:title="비서 설정">
 
         <EditTextPreference
-            app:key="setting_ep_nickName"
+            app:key="setting_ep_secretary_name"
             app:title="비서 이름 설정"
             app:summary="비서의 이름을 설정할 수 있습니다."/>
 
         <ListPreference
-            app:key="setting_lp_voiceSelect"
+            app:key="setting_lp_secretary_voiceSelect"
             app:entries="@array/array_voice"
             app:entryValues="@array/array_voice"
             app:dialogTitle="비서 목소리 설정"

@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.speech.SpeechRecognizer;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.preference.PreferenceManager;
 
 import com.example.sprinkle_android.R;
 import com.example.sprinkle_android.activity.ChatActivity;
@@ -25,11 +27,9 @@ import com.example.sprinkle_android.activity.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-import static android.os.SystemClock.sleep;
 import static android.speech.SpeechRecognizer.ERROR_AUDIO;
 import static android.speech.SpeechRecognizer.ERROR_CLIENT;
 import static android.speech.SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS;
@@ -52,18 +52,19 @@ public class SpeakerRecognizer extends RecognitionService {
     private Intent sttIntent;//음성인식 Intent
     private boolean end = false;
     private String resInputVoice = null;
-    private String secretaryName = "시리야";
+    private String secretaryName = null;
+    private SharedPreferences pref;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
         System.out.println("onCreate()함수 호출/ 순서 : 1");
-        initSTT();
+        initData();
         startListening();
 
     }
-    public void initSTT()
+    public void initData()
     {
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
@@ -72,6 +73,9 @@ public class SpeakerRecognizer extends RecognitionService {
             sttIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
             sttIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN.toString());
         }
+        this.pref = PreferenceManager.getDefaultSharedPreferences(this);
+        //Log.d("SpeakerRecognizer",pref.getString("setting_ep_secretary_name",""));
+        this.secretaryName = pref.getString("setting_ep_secretary_name","");
     }
 
     @SuppressLint("HandlerLeak")
@@ -121,7 +125,7 @@ public class SpeakerRecognizer extends RecognitionService {
         // 아래 코드가 있으면 일단 오류... 근데 이 함수가 호출되면 알림바?에 표시됨.. 원래라면 서비스 호출후 5초이내에 이 메소드가 호출되지 않으면 종료된다고 하는데...왜 종료되지 않는 걸까?
         //startForeground(1, notification);
 
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
 
@@ -160,7 +164,6 @@ public class SpeakerRecognizer extends RecognitionService {
                     mSrRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
                     mSrRecognizer.setRecognitionListener(mClsRecognitionListener);
                 }
-                Log.d("확인","여기 오니?");
                 mSrRecognizer.startListening(sttIntent);
             }
             mBoolVoiceRecognitionStarted = true;  //음성인식 서비스 실행 중
@@ -215,6 +218,8 @@ public class SpeakerRecognizer extends RecognitionService {
             mResult.toArray(rs);
             StringTokenizer strTokenizer = new StringTokenizer(Arrays.toString(rs),"[]");
             resInputVoice = strTokenizer.nextToken();
+            secretaryName = pref.getString("setting_ep_secretary_name",pref.getString("secretaryName",""));
+            Log.d("secretaryName2" , secretaryName);
             Log.d("resInputVoice" , resInputVoice);
             if(resInputVoice.equals(secretaryName)) {
                 Log.d("여기 오니? " ,"com.example.sprinkle_android.recognition.SpeakerRecognizer");
@@ -225,7 +230,6 @@ public class SpeakerRecognizer extends RecognitionService {
                 chatIntent.putExtra("input_userVoice",resInputVoice);
                 chatIntent.putExtra("input_secretaryVoice","네");
                 getApplication().startActivity(chatIntent);
-                Log.d("여기 오니? " , "오는데??2");
                 stopSelf();
             }
             else {

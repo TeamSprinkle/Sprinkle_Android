@@ -2,6 +2,8 @@ package com.example.sprinkle_android.scenarios;
 
 import android.content.Context;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class Schedule extends Scenario{
@@ -14,6 +16,8 @@ public class Schedule extends Scenario{
     {
         this.intent = "schedule";
 
+        this.entity = new ArrayList<String>();
+        this.entityAnswer = new ArrayList<String>();
         this.entity.add("Date");
         this.entity.add("Subject");
         this.entity.add("Time");
@@ -25,9 +29,9 @@ public class Schedule extends Scenario{
         return this.intent;
     }
 
-    public void runScenario(Context context, String data)
+    public String runScenario(Context context, JSONObject data)
     {
-        ;
+        return "";
     }
 
     public String getRequireAnswer(String entity)
