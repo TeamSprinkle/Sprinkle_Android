@@ -14,9 +14,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 public class Call extends Scenario{
 
@@ -44,17 +41,19 @@ public class Call extends Scenario{
         String phoneNumber = "";
 
         try {
-            target = (String) answer.get("target");
+            target = (String)answer.get("target");
             Log.d("Call",target);
-            
+
+            phoneNumber = getAddressBook(context,target);
             // 전화걸기
-            if(getAddressBook(context,"이경원") == -1)
+            if(phoneNumber == "Fail")
             {
                 return "Fail";
 
             }
             else
             {
+                Log.d("Call","전화번호 : "+ phoneNumber);
                 context.startActivity(new Intent("android.intent.action.CALL", Uri.parse("tel:" + phoneNumber)));
                 return "Success";
             }
@@ -63,31 +62,35 @@ public class Call extends Scenario{
         }
         return "";
     }
-    public int getAddressBook(Context context,String target)
+    public String getAddressBook(Context context,String target)
     {
-        String regExp = "^[가-힣]";
-        String v_id = null;
         String name = null;
+        String v_id = null;
         String phoneNum = null;
 
         ContentResolver resolver = context.getContentResolver();
-        Uri phoneUri = ContactsContract.Contacts.CONTENT_URI;
-        Cursor cursor = resolver.query(phoneUri, Code.ADDRESS_PROJECTION, null,null, null);
+        Cursor cursor = resolver.query(ContactsContract.Contacts.CONTENT_URI,Code.ADDRESS_PROJECTION, ContactsContract.Contacts.HAS_PHONE_NUMBER + "=1",null, null);
+        Cursor phoneCursor;
 
         while (cursor.moveToNext()){
-            try {
-                name = cursor.getString(1);
-                phoneNum = cursor.getString(2);
+
+            v_id = cursor.getString(0);
+            System.out.println("id : " + v_id);
+            name = cursor.getString(1);
+            System.out.println("이름 : " + name);
+
+            phoneCursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,Code.ADDRESS_PHONE_PROJECTION,ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + v_id,null,null);
+
+            while (phoneCursor.moveToNext()){
+                phoneNum = phoneCursor.getString(0);
+                System.out.println("번호 : " + phoneNum);
                 if(name.equals(target))
                 {
-                    Log.d("이거 번호 뭐니?",phoneNum);
-                    return Integer.parseInt(phoneNum);
+                    return phoneNum.replaceAll("[^0-9]","");
                 }
-            }catch(Exception e) {
-                System.out.println(e.toString());
             }
         }
-        return -1;
+        return "Fail";
     }
     public String getRequireAnswer(String entity)
     {

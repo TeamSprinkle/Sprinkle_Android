@@ -243,10 +243,10 @@ public class ChatActivity extends AppCompatActivity{
                 {
                     for(Scenario scenario : this.scenarios)
                     {
-                        if(scenario.getIntent().equals(res.getJSONObject("answer")))
+                        if(scenario.getIntent().equals(res.get("intent")))
                         {
-                            //Log.d("확인용","여기 오냐");
-                            scenario.runScenario(this, res);
+                            Log.d("확인용","여기 오냐");
+                            scenario.runScenario(this, res.getJSONObject("answer"));
                         }
                     }
                 }

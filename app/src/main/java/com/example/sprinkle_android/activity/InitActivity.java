@@ -156,8 +156,8 @@ public class InitActivity extends AppCompatActivity {
                     // 권한 모두 허가
                     resCheck = true;
                     getDeviceInfo();
-                    getAddressBook();
-                    //getAddressBook2();
+                    //getAddressBook();
+                    getAddressBook2();
                     getUserInfo();
 
                     // SharedPreferences 초기화
@@ -231,23 +231,35 @@ public class InitActivity extends AppCompatActivity {
     }
     public void getAddressBook2()
     {
-        String regExp = "^[가-힣]";
         String name = null;
         String v_id = null;
-        Set<String> savePhoneBooks = null;
+        String phoneNum = null;
 
         ContentResolver resolver = getApplication().getContentResolver();
-        Uri phoneUri = ContactsContract.Contacts.CONTENT_URI;
-        Cursor cursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null, null,null, null);
+        Cursor cursor = resolver.query(ContactsContract.Contacts.CONTENT_URI,Code.ADDRESS_PROJECTION, ContactsContract.Contacts.HAS_PHONE_NUMBER + "=1",null, null);
+        Cursor phoneCursor;
 
         while (cursor.moveToNext()){
-            try {
-                System.out.println("이름 : " + cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                System.out.println("번호 : " + cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            }catch(Exception e) {
-                System.out.println(e.toString());
+
+            v_id = cursor.getString(0);
+            System.out.println("id : " + v_id);
+            name = cursor.getString(1);
+            System.out.println("이름 : " + name);
+
+            phoneCursor = resolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,Code.ADDRESS_PHONE_PROJECTION,ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + v_id,null,null);
+
+            while (phoneCursor.moveToNext()){
+
+                phoneNum = phoneCursor.getString(0);
+                System.out.println("번호 : " + phoneNum.replaceAll("[^0-9]",""));
             }
         }
+
+
+
+
+
+
         Iterator<String> iter = this.phoneBooks.iterator();
         while(iter.hasNext())
         {
